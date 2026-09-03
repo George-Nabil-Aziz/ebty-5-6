@@ -20,11 +20,6 @@ const restartBtn = document.getElementById("restart-btn");
 const timerEl = document.getElementById("timer");
 const langToggleBtn = document.getElementById("lang-toggle");
 const themeToggleBtn = document.getElementById("theme-toggle");
-const logoEl = document.getElementById("logo");
-
-const LOGO_LIGHT = "logo.png";
-const LOGO_DARK = "logo-dark.png";
-
 const BEST_SCORE_KEY = "quiz_best_score";
 const LAST_SCORE_KEY = "quiz_last_score";
 const LAST_TOTAL_KEY = "quiz_last_total";
@@ -415,26 +410,10 @@ function applyLanguage(lang) {
   }
 }
 
-function setFavicon(href) {
-  // Some browsers won't refresh the tab icon on a plain href change,
-  // so the <link> is replaced outright to force a re-fetch/re-render.
-  const oldLink = document.getElementById("favicon");
-  const newLink = document.createElement("link");
-  newLink.id = "favicon";
-  newLink.rel = "icon";
-  newLink.type = "image/png";
-  newLink.href = href;
-  oldLink.replaceWith(newLink);
-}
-
 function applyTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);
   document.documentElement.dataset.theme = theme;
   themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
-
-  const logoSrc = theme === "dark" ? LOGO_DARK : LOGO_LIGHT;
-  logoEl.src = logoSrc;
-  setFavicon(logoSrc);
 }
 
 langToggleBtn.addEventListener("click", () => {
