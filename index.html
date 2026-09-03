@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <link id="favicon" rel="icon" type="image/png" href="logo.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <div class="app-header" dir="ltr">
+        <img id="logo" src="logo.png" alt="Quiz Logo" class="logo" />
+        <div class="header-toggles">
+          <button id="lang-toggle" class="toggle-btn" type="button">EN</button>
+          <button id="theme-toggle" class="toggle-btn" type="button">🌙</button>
+        </div>
+      </div>
+
+      <!-- شاشة البداية -->
+      <section id="start-screen" class="screen">
+        <h1 id="app-title">الكويز</h1>
+        <p id="quiz-notice" class="quiz-notice"></p>
+        <p id="last-score" class="last-score"></p>
+        <button id="start-btn" class="btn primary">ابدأ الكويز</button>
+        <!-- TEMP: زرار تجربة بس، هيتشال بعدين -->
+        <button id="debug-last-btn" class="btn" type="button" style="margin-top: 8px; background: #999; color: #fff;">
+          🧪 تجربة: روح لآخر سؤال
+        </button>
+      </section>
+
+      <!-- شاشة السؤال -->
+      <section id="quiz-screen" class="screen hidden">
+        <div class="progress">
+          <span id="progress-text"></span>
+          <span id="timer" class="timer">15:00</span>
+        </div>
+        <!-- TEMP: أزرار تجربة بس، هتتشال بعدين -->
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+          <button id="debug-prev-btn" class="btn" type="button" style="background: #999; color: #fff;">◀️ سؤال سابق</button>
+          <button id="debug-next-btn" class="btn" type="button" style="background: #999; color: #fff;">سؤال تالي ▶️</button>
+        </div>
+        <h2 id="question-text" dir="rtl"></h2>
+        <div id="answer-area" dir="rtl"></div>
+        <button id="next-btn" class="btn primary">التالي</button>
+      </section>
+
+      <!-- شاشة النتيجة -->
+      <section id="result-screen" class="screen hidden">
+        <h1 id="result-title">النتيجة</h1>
+        <p id="score-text" class="score-text"></p>
+        <div id="review-list" class="review-list"></div>
+        <button id="restart-btn" class="btn primary">إعادة الكويز</button>
+      </section>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
