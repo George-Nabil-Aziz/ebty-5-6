@@ -179,7 +179,7 @@ function formatTime(seconds) {
 }
 
 function renderTimer() {
-  timerEl.textContent = formatTime(secondsLeft);
+  timerEl.textContent = formatTime(Math.abs(secondsLeft));
   timerEl.classList.toggle("timer-danger", secondsLeft <= 0);
 }
 
@@ -189,10 +189,6 @@ function startTimer() {
   renderTimer();
   timerInterval = setInterval(() => {
     secondsLeft--;
-    if (secondsLeft <= 0) {
-      secondsLeft = 0;
-      clearInterval(timerInterval);
-    }
     renderTimer();
   }, 1000);
 }
@@ -299,6 +295,8 @@ function renderQuestion() {
     if (q.lang === "cop") input.classList.add("coptic-text");
     input.placeholder = t("fillPlaceholder");
     input.addEventListener("input", () => {
+      const digitsOnly = input.value.replace(/[^0-9]/g, "");
+      if (digitsOnly !== input.value) input.value = digitsOnly;
       selectedAnswer = input.value;
     });
     answerArea.appendChild(input);
