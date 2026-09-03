@@ -7,9 +7,6 @@ const resultTitleEl = document.getElementById("result-title");
 const quizNoticeEl = document.getElementById("quiz-notice");
 const lastScoreEl = document.getElementById("last-score");
 const startBtn = document.getElementById("start-btn");
-const debugLastBtn = document.getElementById("debug-last-btn"); // TEMP: هيتشال بعدين
-const debugPrevBtn = document.getElementById("debug-prev-btn"); // TEMP: هيتشال بعدين
-const debugNextBtn = document.getElementById("debug-next-btn"); // TEMP: هيتشال بعدين
 const progressText = document.getElementById("progress-text");
 const questionText = document.getElementById("question-text");
 const answerArea = document.getElementById("answer-area");
@@ -100,7 +97,9 @@ let timerInterval = null;
 let secondsLeft = QUIZ_DURATION_SECONDS;
 let quizQuestions = QUESTIONS;
 
-const EASY_QUESTIONS_LIMIT = 10;
+// عدد الأسئلة اللي بتتسحب من كل مستوى في كل امتحان (لو المتاح أقل، بياخد المتاح).
+const QUOTAS = { easy: 10, medium: 25, hard: 15 };
+const LEVELS = ["easy", "medium", "hard"];
 
 function shuffle(array) {
   const result = [...array];
@@ -111,13 +110,11 @@ function shuffle(array) {
   return result;
 }
 
+// كل مستوى بيتخلط جوه نفسه، والمستويات بتتراكم بالترتيب: easy ثم medium ثم hard.
 function buildQuizOrder() {
-  const easy = shuffle(QUESTIONS.filter((q) => q.difficulty === "easy")).slice(
-    0,
-    EASY_QUESTIONS_LIMIT,
+  return LEVELS.flatMap((level) =>
+    shuffle(QUESTIONS_BY_DIFFICULTY[level]).slice(0, QUOTAS[level]),
   );
-  const rest = QUESTIONS.filter((q) => q.difficulty !== "easy");
-  return [...easy, ...rest];
 }
 
 function t(key) {
@@ -283,25 +280,40 @@ function renderQuestion() {
     answerArea.appendChild(trueBtn);
     answerArea.appendChild(falseBtn);
   } else if (q.type === "fill") {
+    const isNumericAnswer = /^[0-9]+$/.test(String(q.answer).trim());
     const input = document.createElement("input");
     input.type = "text";
-    input.inputMode = "numeric";
-    input.pattern = "[0-9]*";
+    if (isNumericAnswer) {
+      input.inputMode = "numeric";
+      input.pattern = "[0-9]*";
+    }
     if (q.lang === "cop") input.classList.add("coptic-text");
     input.placeholder = t("fillPlaceholder");
     input.addEventListener("input", () => {
-      const digitsOnly = input.value.replace(/[^0-9]/g, "");
-      if (digitsOnly !== input.value) input.value = digitsOnly;
+      if (isNumericAnswer) {
+        const digitsOnly = input.value.replace(/[^0-9]/g, "");
+        if (digitsOnly !== input.value) input.value = digitsOnly;
+      }
       selectedAnswer = input.value;
     });
     answerArea.appendChild(input);
   }
 }
 
+function normalizeFillAnswer(value) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[أإآا]/g, "ا")
+    .replace(/[ةه]/g, "ه")
+    .replace(/[يى]/g, "ي")
+    .replace(/^و/, "");
+}
+
 function isCorrect(q, given) {
   if (q.type === "fill") {
     if (typeof given !== "string") return false;
-    return given.trim().toLowerCase() === String(q.answer).trim().toLowerCase();
+    return normalizeFillAnswer(given) === normalizeFillAnswer(String(q.answer));
   }
   return given === q.answer;
 }
@@ -355,11 +367,10 @@ function renderResult() {
 
     const aEl = document.createElement("div");
     aEl.className = "a";
-    if (a.correct) {
-      aEl.textContent = `${t("yourAnswer")}: ${formatGiven(a.question, a.given)} ✓`;
-    } else {
-      aEl.textContent = `${t("yourAnswer")}: ${formatGiven(a.question, a.given)} — ${t("correct")}: ${formatAnswer(a.question)}`;
-    }
+    const line = a.correct
+      ? `${t("yourAnswer")}: ${formatGiven(a.question, a.given)} ✓`
+      : `${t("yourAnswer")}: ${formatGiven(a.question, a.given)} — ${t("correct")}: ${formatAnswer(a.question)}`;
+    appendWithCopticMarkers(aEl, line);
 
     item.appendChild(qEl);
     item.appendChild(aEl);
@@ -429,23 +440,6 @@ themeToggleBtn.addEventListener("click", () => {
 startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", handleNext);
 restartBtn.addEventListener("click", renderStartScreen);
-
-// TEMP: هيتشال بعدين
-debugLastBtn.addEventListener("click", () => {
-  startQuiz();
-  currentIndex = quizQuestions.length - 1;
-  renderQuestion();
-});
-
-debugPrevBtn.addEventListener("click", () => {
-  currentIndex = Math.max(0, currentIndex - 1);
-  renderQuestion();
-});
-
-debugNextBtn.addEventListener("click", () => {
-  currentIndex = Math.min(quizQuestions.length - 1, currentIndex + 1);
-  renderQuestion();
-});
 
 applyLanguage(currentLang);
 applyTheme(localStorage.getItem(THEME_KEY) || "light");
