@@ -75,6 +75,14 @@ const MCQ_QUESTIONS = [
     options: ["ج ش ن", "ع ج ك", "ك ش خ", "ف ن ع"],
     answer: 2,
   },
+  {
+    id: 17,
+    type: "mcq",
+    difficulty: "medium",
+    question: "يعني ايه كلمة {{ⲁⲫⲉ}}؟",
+    options: ["يد", "رأس", "رجل"],
+    answer: 1,
+  },
 ];
 
 const TRUEFALSE_QUESTIONS = [
