@@ -119,7 +119,7 @@ function shuffle(array) {
 function buildQuizOrder() {
   const easy = shuffle(QUESTIONS.filter((q) => q.difficulty === "easy")).slice(
     0,
-    EASY_QUESTIONS_LIMIT
+    EASY_QUESTIONS_LIMIT,
   );
   const rest = QUESTIONS.filter((q) => q.difficulty !== "easy");
   return [...easy, ...rest];
@@ -130,7 +130,9 @@ function t(key) {
 }
 
 function showScreen(screen) {
-  [startScreen, quizScreen, resultScreen].forEach((s) => s.classList.add("hidden"));
+  [startScreen, quizScreen, resultScreen].forEach((s) =>
+    s.classList.add("hidden"),
+  );
   screen.classList.remove("hidden");
 }
 
@@ -148,7 +150,9 @@ function setBestScore(score) {
 function getLastScore() {
   const value = localStorage.getItem(LAST_SCORE_KEY);
   const total = localStorage.getItem(LAST_TOTAL_KEY);
-  return value === null || total === null ? null : { score: Number(value), total: Number(total) };
+  return value === null || total === null
+    ? null
+    : { score: Number(value), total: Number(total) };
 }
 
 function setLastScore(score, total) {
@@ -158,7 +162,8 @@ function setLastScore(score, total) {
 
 function renderLastScoreText() {
   const last = getLastScore();
-  lastScoreEl.textContent = last !== null ? t("lastScore")(last.score, last.total) : "";
+  lastScoreEl.textContent =
+    last !== null ? t("lastScore")(last.score, last.total) : "";
 }
 
 function renderStartScreen() {
@@ -242,7 +247,10 @@ function renderQuestionText(el, q, numberPrefix) {
 function renderQuestion() {
   selectedAnswer = null;
   const q = quizQuestions[currentIndex];
-  progressText.textContent = t("questionOf")(currentIndex + 1, quizQuestions.length);
+  progressText.textContent = t("questionOf")(
+    currentIndex + 1,
+    quizQuestions.length,
+  );
   renderQuestionText(questionText, q);
   answerArea.innerHTML = "";
   answerArea.classList.toggle("truefalse-row", q.type === "truefalse");
@@ -286,6 +294,8 @@ function renderQuestion() {
   } else if (q.type === "fill") {
     const input = document.createElement("input");
     input.type = "text";
+    input.inputMode = "numeric";
+    input.pattern = "[0-9]*";
     if (q.lang === "cop") input.classList.add("coptic-text");
     input.placeholder = t("fillPlaceholder");
     input.addEventListener("input", () => {
@@ -306,7 +316,11 @@ function isCorrect(q, given) {
 function handleNext() {
   const q = quizQuestions[currentIndex];
   const given = selectedAnswer;
-  const correct = given !== null && given !== undefined && given !== "" && isCorrect(q, given);
+  const correct =
+    given !== null &&
+    given !== undefined &&
+    given !== "" &&
+    isCorrect(q, given);
 
   userAnswers.push({ question: q, given, correct });
 
@@ -319,7 +333,8 @@ function handleNext() {
 }
 
 function formatGiven(q, given) {
-  if (given === null || given === undefined || given === "") return t("noAnswer");
+  if (given === null || given === undefined || given === "")
+    return t("noAnswer");
   if (q.type === "mcq") return q.options[given] ?? t("noAnswer");
   if (q.type === "truefalse") return given ? t("true") : t("false");
   return given;
@@ -388,7 +403,10 @@ function applyLanguage(lang) {
 
   if (!quizScreen.classList.contains("hidden")) {
     const q = quizQuestions[currentIndex];
-    progressText.textContent = t("questionOf")(currentIndex + 1, quizQuestions.length);
+    progressText.textContent = t("questionOf")(
+      currentIndex + 1,
+      quizQuestions.length,
+    );
     if (q.type === "fill") {
       answerArea.querySelector("input").placeholder = t("fillPlaceholder");
     }
@@ -426,7 +444,8 @@ langToggleBtn.addEventListener("click", () => {
 });
 
 themeToggleBtn.addEventListener("click", () => {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  const next =
+    document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   applyTheme(next);
 });
 
