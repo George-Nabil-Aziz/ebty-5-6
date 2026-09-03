@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختار صوت زرار التالي</title>
+    <style>
+      body {
+        font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+        background: #f4f5f7;
+        color: #1c1d21;
+        margin: 0;
+        padding: 24px 16px 48px;
+      }
+      .wrap { max-width: 560px; margin: 0 auto; }
+      h1 { font-size: 22px; margin: 0 0 6px; }
+      p.hint { color: #666; margin: 0 0 22px; font-size: 15px; }
+      .card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #fff;
+        border: 1px solid #e3e5e9;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+      .num {
+        flex: none;
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: #1c1d21; color: #fff;
+        display: grid; place-items: center;
+        font-weight: 700; font-size: 15px;
+      }
+      .meta { flex: 1; }
+      .name { font-weight: 700; font-size: 16px; }
+      .desc { color: #6b6f76; font-size: 13px; margin-top: 2px; }
+      button.play {
+        flex: none;
+        background: #2f6df6; color: #fff;
+        border: 0; border-radius: 9px;
+        padding: 11px 20px;
+        font-size: 15px; font-weight: 600;
+        cursor: pointer;
+      }
+      button.play:active { transform: scale(0.97); }
+      .footer { margin-top: 24px; color: #6b6f76; font-size: 14px; line-height: 1.7; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>اختار صوت زرار "التالي"</h1>
+      <p class="hint">دوس على كل واحد واسمعه، وبعدين قوللي رقم اللي عاجبك.</p>
+      <div id="list"></div>
+      <div class="footer">
+        الملف ده للتجربة بس — بعد ما تختار احذفه عادي، مش جزء من الكويز.
+      </div>
+    </div>
+
+    <script>
+      let ctx = null;
+      function audio() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === "suspended") ctx.resume();
+        return ctx;
+      }
+
+      // نغمة واحدة: تردد + شكل موجة + ظرف صوتي (بيعلى بسرعة وبيخفت بالتدريج)
+      function tone(dest, { freq, type = "sine", peak = 0.2, attack = 0.008, decay = 0.3, at = 0, glideTo = null, glideTime = 0.1 }) {
+        const c = audio();
+        const t = c.currentTime + at;
+        const osc = c.createOscillator();
+        const env = c.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, t + glideTime);
+        env.gain.setValueAtTime(0.0001, t);
+        env.gain.exponentialRampToValueAtTime(peak, t + attack);
+        env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        osc.connect(env).connect(dest);
+        osc.start(t);
+        osc.stop(t + decay + 0.03);
+      }
+
+      // ضوضاء قصيرة، بتستخدم في صوت الكليك والـ swoosh
+      function noise(dest, { peak = 0.2, decay = 0.12, at = 0, filterType = "bandpass", from = 1200, to = null }) {
+        const c = audio();
+        const t = c.currentTime + at;
+        const len = Math.ceil(c.sampleRate * (decay + 0.05));
+        const buf = c.createBuffer(1, len, c.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        const filt = c.createBiquadFilter();
+        filt.type = filterType;
+        filt.Q.value = 1.2;
+        filt.frequency.setValueAtTime(from, t);
+        if (to) filt.frequency.exponentialRampToValueAtTime(to, t + decay);
+        const env = c.createGain();
+        env.gain.setValueAtTime(0.0001, t);
+        env.gain.exponentialRampToValueAtTime(peak, t + 0.005);
+        env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+        src.connect(filt).connect(env).connect(dest);
+        src.start(t);
+        src.stop(t + decay + 0.05);
+      }
+
+      function lowpass(cutoff, gain) {
+        const c = audio();
+        const f = c.createBiquadFilter();
+        f.type = "lowpass";
+        f.frequency.value = cutoff;
+        const g = c.createGain();
+        g.gain.value = gain;
+        f.connect(g).connect(c.destination);
+        return f;
+      }
+
+      const SOUNDS = [
+        {
+          name: "جرس خشبي (اللي شغال دلوقتي)",
+          desc: "نغمة دافية، نوتة أساسية + توافقيات بتخفت بسرعة",
+          play() {
+            const out = lowpass(2800, 0.9);
+            tone(out, { freq: 784, type: "triangle", peak: 0.22, decay: 0.55 });
+            tone(out, { freq: 1568, peak: 0.09, decay: 0.28 });
+            tone(out, { freq: 2359, peak: 0.04, decay: 0.15 });
+          },
+        },
+        {
+          name: "نقطة ماء (Pop)",
+          desc: "صوت قصير جدًا وناعم، التردد بينزل بسرعة — زي فقاعة",
+          play() {
+            const out = lowpass(4000, 1);
+            tone(out, { freq: 900, type: "sine", peak: 0.32, attack: 0.004, decay: 0.14, glideTo: 320, glideTime: 0.09 });
+          },
+        },
+        {
+          name: "نغمتين طالعين (Ding-ding)",
+          desc: "نوتتين ورا بعض بيطلعوا لفوق — بيدوا إحساس تقدّم وإنجاز",
+          play() {
+            const out = lowpass(3200, 0.8);
+            tone(out, { freq: 1046, type: "triangle", peak: 0.2, decay: 0.22, at: 0 });
+            tone(out, { freq: 1319, type: "triangle", peak: 0.22, decay: 0.45, at: 0.09 });
+          },
+        },
+        {
+          name: "جرس زجاج (Glass)",
+          desc: "نغمة عالية رفيعة بذيل طويل رنّان، فيها لمعة",
+          play() {
+            const out = lowpass(6000, 0.7);
+            tone(out, { freq: 1568, peak: 0.16, decay: 0.9 });
+            tone(out, { freq: 1573, peak: 0.12, decay: 0.85 });
+            tone(out, { freq: 3136, peak: 0.05, decay: 0.4 });
+          },
+        },
+        {
+          name: "كليك ناعم (Tick)",
+          desc: "صوت ميكانيكي خفيف جدًا زي كبسة كيبورد، من غير أي نغمة",
+          play() {
+            const out = lowpass(9000, 1);
+            noise(out, { peak: 0.28, decay: 0.05, from: 2200, filterType: "bandpass" });
+            tone(out, { freq: 180, type: "sine", peak: 0.18, attack: 0.002, decay: 0.06 });
+          },
+        },
+        {
+          name: "بليب رقمي (Retro)",
+          desc: "موجة مربعة مفلترة — إحساس ألعاب وتكنولوجيا",
+          play() {
+            const out = lowpass(2000, 0.6);
+            tone(out, { freq: 660, type: "square", peak: 0.16, attack: 0.005, decay: 0.09 });
+            tone(out, { freq: 990, type: "square", peak: 0.16, attack: 0.005, decay: 0.13, at: 0.07 });
+          },
+        },
+        {
+          name: "قلب صفحة (Swoosh)",
+          desc: "همسة هوا سريعة بتنزل من فوق لتحت — زي تقليب ورقة",
+          play() {
+            const c = audio();
+            const g = c.createGain();
+            g.gain.value = 0.9;
+            g.connect(c.destination);
+            noise(g, { peak: 0.22, decay: 0.22, from: 4000, to: 500, filterType: "bandpass" });
+          },
+        },
+        {
+          name: "بيانو خافت (Soft key)",
+          desc: "نوتة بيانو ناعمة بذيل متوسط — هادية ومناسبة للتكرار",
+          play() {
+            const out = lowpass(2200, 0.95);
+            tone(out, { freq: 587, type: "triangle", peak: 0.2, attack: 0.01, decay: 0.7 });
+            tone(out, { freq: 1174, type: "sine", peak: 0.07, decay: 0.35 });
+            tone(out, { freq: 880, type: "sine", peak: 0.05, decay: 0.5 });
+          },
+        },
+      ];
+
+      const list = document.getElementById("list");
+      SOUNDS.forEach((s, i) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML =
+          '<div class="num">' + (i + 1) + "</div>" +
+          '<div class="meta"><div class="name"></div><div class="desc"></div></div>' +
+          '<button class="play" type="button">▶ سمّع</button>';
+        card.querySelector(".name").textContent = s.name;
+        card.querySelector(".desc").textContent = s.desc;
+        card.querySelector("button").addEventListener("click", s.play);
+        list.appendChild(card);
+      });
+    </script>
+  </body>
+</html>

@@ -98,7 +98,7 @@ let secondsLeft = QUIZ_DURATION_SECONDS;
 let quizQuestions = QUESTIONS;
 
 // عدد الأسئلة اللي بتتسحب من كل مستوى في كل امتحان (لو المتاح أقل، بياخد المتاح).
-const QUOTAS = { easy: 10, medium: 25, hard: 15 };
+const QUOTAS = { easy: 10, medium: 20, hard: 10 };
 const LEVELS = ["easy", "medium", "hard"];
 
 function shuffle(array) {
@@ -318,7 +318,192 @@ function isCorrect(q, given) {
   return given === q.answer;
 }
 
+// ===== أصوات زرار "التالي" =====
+// كل الأصوات متولّدة بالكود عن طريق Web Audio API، مفيش أي ملف صوت.
+// مع كل دوسة على "التالي" بيتشغّل صوت عشوائي من اللستة اللي تحت،
+// من غير ما يكرر نفس الصوت مرتين ورا بعض.
+
+let audioCtx = null;
+
+function getAudioCtx() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  if (!audioCtx) audioCtx = new Ctx();
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+
+// نغمة واحدة: تردد + شكل موجة + ظرف صوتي (بيعلى بسرعة وبيخفت بالتدريج).
+// glideTo -> لو موجود، التردد بيتزحلق للقيمة دي خلال glideTime.
+function tone(dest, opts) {
+  const c = getAudioCtx();
+  const {
+    freq,
+    type = "sine",
+    peak = 0.2,
+    attack = 0.008,
+    decay = 0.3,
+    at = 0,
+    glideTo = null,
+    glideTime = 0.1,
+  } = opts;
+
+  const t = c.currentTime + at;
+  const osc = c.createOscillator();
+  const env = c.createGain();
+
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t);
+  if (glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, t + glideTime);
+
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(peak, t + attack);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+
+  osc.connect(env).connect(dest);
+  osc.start(t);
+  osc.stop(t + decay + 0.03);
+}
+
+// ضوضاء قصيرة مفلترة، بتستخدم في صوت الكليك والـ swoosh.
+function noise(dest, opts) {
+  const c = getAudioCtx();
+  const {
+    peak = 0.2,
+    decay = 0.12,
+    at = 0,
+    filterType = "bandpass",
+    from = 1200,
+    to = null,
+  } = opts;
+
+  const t = c.currentTime + at;
+  const len = Math.ceil(c.sampleRate * (decay + 0.05));
+  const buf = c.createBuffer(1, len, c.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+
+  const src = c.createBufferSource();
+  src.buffer = buf;
+
+  const filt = c.createBiquadFilter();
+  filt.type = filterType;
+  filt.Q.value = 1.2;
+  filt.frequency.setValueAtTime(from, t);
+  if (to) filt.frequency.exponentialRampToValueAtTime(to, t + decay);
+
+  const env = c.createGain();
+  env.gain.setValueAtTime(0.0001, t);
+  env.gain.exponentialRampToValueAtTime(peak, t + 0.005);
+  env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+
+  src.connect(filt).connect(env).connect(dest);
+  src.start(t);
+  src.stop(t + decay + 0.05);
+}
+
+// مخرج مفلتر بيقص الحدة الزيادة، وبيتحكم في الفوليوم العام للصوت.
+function soundOut(cutoff, gain) {
+  const c = getAudioCtx();
+  const filt = c.createBiquadFilter();
+  filt.type = "lowpass";
+  filt.frequency.value = cutoff;
+  const vol = c.createGain();
+  vol.gain.value = gain;
+  filt.connect(vol).connect(c.destination);
+  return filt;
+}
+
+const CLICK_SOUNDS = [
+  // جرس خشبي: نوتة أساسية + توافقيات بتخفت أسرع منها
+  function woodBell() {
+    const out = soundOut(2800, 0.9);
+    tone(out, { freq: 784, type: "triangle", peak: 0.22, decay: 0.55 });
+    tone(out, { freq: 1568, peak: 0.09, decay: 0.28 });
+    tone(out, { freq: 2359, peak: 0.04, decay: 0.15 });
+  },
+
+  // نقطة ماء: التردد بينزل بسرعة فبيطلع زي الفقاعة
+  function waterPop() {
+    const out = soundOut(4000, 1);
+    tone(out, {
+      freq: 900,
+      peak: 0.32,
+      attack: 0.004,
+      decay: 0.14,
+      glideTo: 320,
+      glideTime: 0.09,
+    });
+  },
+
+  // نغمتين طالعين ورا بعض، إحساس تقدّم
+  function twoNoteRise() {
+    const out = soundOut(3200, 0.8);
+    tone(out, { freq: 1046, type: "triangle", peak: 0.2, decay: 0.22 });
+    tone(out, { freq: 1319, type: "triangle", peak: 0.22, decay: 0.45, at: 0.09 });
+  },
+
+  // جرس زجاج: نوتتين قريبين جدًا من بعض بيعملوا رنّة لامعة
+  function glassBell() {
+    const out = soundOut(6000, 0.7);
+    tone(out, { freq: 1568, peak: 0.16, decay: 0.9 });
+    tone(out, { freq: 1573, peak: 0.12, decay: 0.85 });
+    tone(out, { freq: 3136, peak: 0.05, decay: 0.4 });
+  },
+
+  // كليك ميكانيكي خفيف زي كبسة الكيبورد
+  function softTick() {
+    const out = soundOut(9000, 1);
+    noise(out, { peak: 0.28, decay: 0.05, from: 2200 });
+    tone(out, { freq: 180, peak: 0.18, attack: 0.002, decay: 0.06 });
+  },
+
+  // بليب رقمي بموجة مربعة مفلترة
+  function retroBlip() {
+    const out = soundOut(2000, 0.6);
+    tone(out, { freq: 660, type: "square", peak: 0.16, attack: 0.005, decay: 0.09 });
+    tone(out, { freq: 990, type: "square", peak: 0.16, attack: 0.005, decay: 0.13, at: 0.07 });
+  },
+
+  // قلب صفحة: ضوضاء بتنزل من تردد عالي لواطي
+  function pageSwoosh() {
+    const c = getAudioCtx();
+    const vol = c.createGain();
+    vol.gain.value = 0.9;
+    vol.connect(c.destination);
+    noise(vol, { peak: 0.22, decay: 0.22, from: 4000, to: 500 });
+  },
+
+  // نوتة بيانو ناعمة بذيل متوسط
+  function softPiano() {
+    const out = soundOut(2200, 0.95);
+    tone(out, { freq: 587, type: "triangle", peak: 0.2, attack: 0.01, decay: 0.7 });
+    tone(out, { freq: 1174, peak: 0.07, decay: 0.35 });
+    tone(out, { freq: 880, peak: 0.05, decay: 0.5 });
+  },
+];
+
+let lastSoundIndex = -1;
+
+function playClickSound() {
+  try {
+    if (!getAudioCtx()) return;
+
+    // نختار صوت عشوائي، وبنعيد الاختيار لو طلع نفس صوت المرة اللي فاتت
+    let index = Math.floor(Math.random() * CLICK_SOUNDS.length);
+    if (CLICK_SOUNDS.length > 1 && index === lastSoundIndex) {
+      index = (index + 1 + Math.floor(Math.random() * (CLICK_SOUNDS.length - 1))) % CLICK_SOUNDS.length;
+    }
+    lastSoundIndex = index;
+
+    CLICK_SOUNDS[index]();
+  } catch (e) {
+    // لو المتصفح مش سامح بالصوت، الكويز يكمل عادي
+  }
+}
+
 function handleNext() {
+  playClickSound();
   const q = quizQuestions[currentIndex];
   const given = selectedAnswer;
   const correct =
