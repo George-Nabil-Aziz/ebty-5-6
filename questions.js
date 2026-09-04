@@ -626,6 +626,80 @@ const HARD_QUESTIONS = [
     question: "كلمة ((}PI)) يعني مذاق.",
     answer: true,
   },
+  {
+    id: 2_1031,
+    type: "mcq",
+    question: "يعني ايه ((ⲚⲈⲚⲀⲄⲄⲈⲖⲞⲤ Ⲛ̀ⲦⲈ ϮⲈⲔⲔⲖⲎⲤⲒⲀ))؟",
+    options: ["خدام الكنيسة", "خدام المذبح", "ملائكة الكنيسة"],
+    answer: 2,
+  },
+  {
+    id: 3_1045,
+    type: "truefalse",
+    question: "{{ⲞⲨ}} أداة تنكير للمفرد، و{{ϨⲀⲚ}} أداة تنكير للجمع.",
+    answer: true,
+  },
+  {
+    id: 3_1046,
+    type: "truefalse",
+    question: "{{ⲠⲀⲒⲰⲦ ⲚⲈⲘ ⲦⲀⲘⲀⲨ}} يعني يوسف مع مريم.",
+    answer: false,
+  },
+  {
+    id: 3_1047,
+    type: "truefalse",
+    question: "كلمة {{ⲚⲈⲘⲀⲔ}} يعني معك.",
+    answer: true,
+  },
+  {
+    id: 3_1048,
+    type: "truefalse",
+    question: "كلمة {{ⲚⲈⲘⲰⲦⲈⲚ}} يعني معكم.",
+    answer: true,
+  },
+  {
+    id: 1_1015,
+    type: "fill",
+    question: "أكمل: {{Ⲡ⳪}} اختصار لكلمة ____.",
+    answer: "الرب",
+  },
+  {
+    id: 1_1016,
+    type: "fill",
+    question: "أكمل: {{ⲠⲬ̅Ⲥ̅}} اختصار لكلمة ____.",
+    answer: "المسيح",
+  },
+  {
+    id: 3_1049,
+    type: "truefalse",
+    question: "{{ⲰϢ}} فعل ماضي.",
+    answer: false,
+  },
+  {
+    id: 3_1050,
+    type: "truefalse",
+    question: "{{Ⲙ̀ⲠⲈⲢ}} بتتضاف عشان فعل الأمر.",
+    answer: false,
+  },
+  {
+    id: 2_1032,
+    type: "mcq",
+    question: "يعني ايه {{ⲀϢ}}؟",
+    options: ["من - لمن - فمن", "ما - كيف - ماذا", "لماذا - كيف - من"],
+    answer: 1,
+  },
+  {
+    id: 3_1051,
+    type: "truefalse",
+    question: "{{ⲀϢ ⲠⲈ ⲠⲈⲦⲈⲚⲢⲀⲚ}} يعني اسمك ايه؟",
+    answer: false,
+  },
+  {
+    id: 3_1052,
+    type: "truefalse",
+    question: "{{ⲠⲈⲢⲀⲚ}} يعني أسماؤكم.",
+    answer: false,
+  },
 ];
 
 const QUESTIONS_BY_DIFFICULTY = {
