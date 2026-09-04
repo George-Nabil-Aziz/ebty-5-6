@@ -88,6 +88,10 @@ body {
   display: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 h1 {
   margin: 0 0 8px;
   font-size: 28px;
@@ -245,11 +249,15 @@ h2 {
 .coptic-text {
   font-family: "Coptic", "Segoe UI", Tahoma, Arial, sans-serif;
   font-size: 1.15em;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .coptic-text-alt {
   font-family: "Coptic-Alt", "Segoe UI", Tahoma, Arial, sans-serif;
   font-size: 1.15em;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 
 .option:hover {
@@ -315,4 +323,93 @@ input[type="text"]:focus {
 .review-item .a {
   font-size: 14px;
   color: var(--muted);
+}
+
+/* ===== TEMP: ستايل أدوات التجربة، هيتشال معاها ===== */
+.debug-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.debug-tools.debug-nav {
+  flex-direction: row;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.debug-goto {
+  display: flex;
+  gap: 8px;
+}
+
+.debug-goto input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.debug-goto .debug-btn {
+  width: auto;
+  white-space: nowrap;
+}
+
+.debug-btn {
+  flex: 1;
+  background: var(--muted);
+  color: #fff;
+  opacity: 0.85;
+}
+
+.debug-btn:hover {
+  opacity: 1;
+}
+
+.debug-answers-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  max-height: 116px;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.debug-dot {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 5px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--option-bg);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.debug-dot:hover {
+  transform: scale(1.15);
+}
+
+.debug-dot.is-correct {
+  background: #22c55e;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.debug-dot.is-wrong {
+  background: #ef4444;
+  border-color: #dc2626;
+  color: #fff;
+}
+
+.debug-dot.is-current {
+  border-color: var(--selected-border);
+  box-shadow: 0 0 0 2px var(--selected-border);
 }

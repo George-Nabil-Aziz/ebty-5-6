@@ -7,6 +7,15 @@ const resultTitleEl = document.getElementById("result-title");
 const quizNoticeEl = document.getElementById("quiz-notice");
 const lastScoreEl = document.getElementById("last-score");
 const startBtn = document.getElementById("start-btn");
+// TEMP: أدوات تجربة، هتتشال قبل الإطلاق
+// خليها true عشان ترجّع أدوات التجربة (الأزرار + شريط الإجابات + id السؤال)
+const DEBUG_TOOLS = false;
+const debugAllBtn = document.getElementById("debug-all-btn");
+const debugPrevBtn = document.getElementById("debug-prev-btn");
+const debugNextBtn = document.getElementById("debug-next-btn");
+const debugQuestionIdInput = document.getElementById("debug-question-id-input");
+const debugGotoBtn = document.getElementById("debug-goto-btn");
+const debugAnswersBar = document.getElementById("debug-answers-bar");
 const progressText = document.getElementById("progress-text");
 const questionText = document.getElementById("question-text");
 const answerArea = document.getElementById("answer-area");
@@ -190,6 +199,7 @@ function stopTimer() {
 }
 
 function startQuiz() {
+  debugBrowsing = false; // TEMP: هيتشال مع أدوات التجربة
   quizQuestions = buildQuizOrder();
   currentIndex = 0;
   userAnswers = [];
@@ -214,7 +224,10 @@ function appendWithCopticMarkers(el, text) {
       span.textContent = altMatch[1];
       el.appendChild(span);
     } else if (part) {
-      el.appendChild(document.createTextNode(part));
+      part.split("\n").forEach((line, i) => {
+        if (i > 0) el.appendChild(document.createElement("br"));
+        if (line) el.appendChild(document.createTextNode(line));
+      });
     }
   });
 }
@@ -235,10 +248,8 @@ function renderQuestionText(el, q, numberPrefix) {
 function renderQuestion() {
   selectedAnswer = null;
   const q = quizQuestions[currentIndex];
-  progressText.textContent = t("questionOf")(
-    currentIndex + 1,
-    quizQuestions.length,
-  );
+  setProgressText();
+  renderDebugAnswersBar(); // TEMP: هيتشال مع أدوات التجربة
   renderQuestionText(questionText, q);
   answerArea.innerHTML = "";
   answerArea.classList.toggle("truefalse-row", q.type === "truefalse");
@@ -512,7 +523,7 @@ function handleNext() {
     given !== "" &&
     isCorrect(q, given);
 
-  userAnswers.push({ question: q, given, correct });
+  userAnswers[currentIndex] = { question: q, given, correct };
 
   currentIndex++;
   if (currentIndex < quizQuestions.length) {
@@ -526,13 +537,13 @@ function formatGiven(q, given) {
   if (given === null || given === undefined || given === "")
     return t("noAnswer");
   if (q.type === "mcq") return q.options[given] ?? t("noAnswer");
-  if (q.type === "truefalse") return given ? t("true") : t("false");
+  if (q.type === "truefalse") return TRUEFALSE_ICONS[given];
   return given;
 }
 
 function formatAnswer(q) {
   if (q.type === "mcq") return q.options[q.answer];
-  if (q.type === "truefalse") return q.answer ? t("true") : t("false");
+  if (q.type === "truefalse") return TRUEFALSE_ICONS[q.answer];
   return q.answer;
 }
 
@@ -592,10 +603,7 @@ function applyLanguage(lang) {
 
   if (!quizScreen.classList.contains("hidden")) {
     const q = quizQuestions[currentIndex];
-    progressText.textContent = t("questionOf")(
-      currentIndex + 1,
-      quizQuestions.length,
-    );
+    setProgressText();
     if (q.type === "fill") {
       answerArea.querySelector("input").placeholder = t("fillPlaceholder");
     }
@@ -621,6 +629,117 @@ themeToggleBtn.addEventListener("click", () => {
     document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   applyTheme(next);
 });
+
+// ===== TEMP: أدوات تجربة، هتتشال قبل الإطلاق =====
+// بتعرض كل الأسئلة بترتيب الملف عشان تراجعها واحد واحد،
+// من غير مؤقت، وبتوريك رقم (id) السؤال اللي إنت واقف عليه.
+
+let debugBrowsing = false;
+
+// 21031 -> "2_1031"، عشان الرقم يبان بنفس شكله في questions.js
+function formatQuestionId(id) {
+  const s = String(id);
+  return s.length > 1 ? s[0] + "_" + s.slice(1) : s;
+}
+
+// TEMP: بيكتب "سؤال ١ من ٢٠" وجنبه id السؤال عشان المراجعة.
+// وقت الإطلاق: شيل جزء الـ id وسيب سطر t("questionOf") بس.
+function setProgressText() {
+  const q = quizQuestions[currentIndex];
+  const base = t("questionOf")(currentIndex + 1, quizQuestions.length);
+  progressText.textContent = DEBUG_TOOLS
+    ? base + "  •  id " + formatQuestionId(q.id)
+    : base;
+}
+
+// شريط فوق السؤال فيه مربع لكل سؤال: أخضر لو جاوبته صح، أحمر لو غلط،
+// ورمادي لو لسه. دوس على أي مربع يوديك للسؤال بتاعه على طول.
+function renderDebugAnswersBar() {
+  if (!DEBUG_TOOLS || !debugAnswersBar) return;
+
+  debugAnswersBar.innerHTML = "";
+
+  quizQuestions.forEach((q, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "debug-dot";
+    dot.textContent = String(i + 1);
+    dot.title = `سؤال ${i + 1} — id ${formatQuestionId(q.id)}`;
+
+    const answered = userAnswers[i];
+    if (answered) dot.classList.add(answered.correct ? "is-correct" : "is-wrong");
+    if (i === currentIndex) dot.classList.add("is-current");
+
+    dot.addEventListener("click", () => debugGoToIndex(i));
+    debugAnswersBar.appendChild(dot);
+  });
+
+  const current = debugAnswersBar.children[currentIndex];
+  if (current) current.scrollIntoView({ block: "nearest" });
+}
+
+function debugGoToIndex(index) {
+  currentIndex = index;
+  if (debugBrowsing) debugRender();
+  else renderQuestion();
+}
+
+function debugRender() {
+  renderQuestion();
+  timerEl.textContent = "🧪";
+  timerEl.classList.remove("timer-danger");
+}
+
+// startId اختياري: لو موجود بيفتح على السؤال ده بدل الأول
+function debugBrowse(startId) {
+  let index = 0;
+
+  if (startId !== undefined) {
+    index = QUESTIONS.findIndex((q) => q.id === startId);
+    if (index < 0) {
+      alert("مفيش سؤال بالرقم ده");
+      return;
+    }
+  }
+
+  debugBrowsing = true;
+  quizQuestions = QUESTIONS;
+  currentIndex = index;
+  userAnswers = [];
+  selectedAnswer = null;
+  stopTimer();
+  showScreen(quizScreen);
+  debugRender();
+}
+
+function debugGoto() {
+  const digits = debugQuestionIdInput.value.replace(/\D/g, "");
+  if (!digits) return;
+  debugBrowse(Number(digits));
+}
+
+debugAllBtn.addEventListener("click", () => debugBrowse());
+debugGotoBtn.addEventListener("click", debugGoto);
+
+debugQuestionIdInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") debugGoto();
+});
+
+debugPrevBtn.addEventListener("click", () => {
+  debugGoToIndex(Math.max(0, currentIndex - 1));
+});
+
+debugNextBtn.addEventListener("click", () => {
+  debugGoToIndex(Math.min(quizQuestions.length - 1, currentIndex + 1));
+});
+
+// لو الأدوات مقفولة، نخفي كل عناصرها من الصفحة
+if (!DEBUG_TOOLS) {
+  document
+    .querySelectorAll(".debug-tools, #debug-answers-bar")
+    .forEach((el) => (el.hidden = true));
+}
+// ===== نهاية أدوات التجربة =====
 
 startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", handleNext);

@@ -80,7 +80,7 @@ const EASY_QUESTIONS = [
   {
     id: 3_1005,
     type: "truefalse",
-    question: "الحرف {{B}} ينطق ڤ لو جه بعده حرف متحرك للكسر.",
+    question: "الحرف {{B}} ينطق ڤ لو جه بعده حرف متحرك للكسر فقط.",
     answer: false,
   },
   {
@@ -110,7 +110,7 @@ const EASY_QUESTIONS = [
   {
     id: 1_1010,
     type: "fill",
-    question: "أكمل: الحرف {{ϢⲀϢϤ}} رقمه ____.",
+    question: "أكمل: كلمه {{ϢⲀϢϤ}} , تعبر عن رقم كام؟ ____.",
     answer: "7",
   },
   {
@@ -161,7 +161,7 @@ const MEDIUM_QUESTIONS = [
   {
     id: 2_1012,
     type: "mcq",
-    question: "ليه في كلمة ((ANGGELOC)) حرف ال ((G)) الثانى اتنطق ي؟",
+    question: "ليه في كلمة ((AGGELOC)) حرف ال ((G)) الثانى اتنطق ج؟",
     options: [
       "علشان قبله حرف حلقى",
       "علشان متكرر",
@@ -172,13 +172,13 @@ const MEDIUM_QUESTIONS = [
   {
     id: 2_1013,
     type: "mcq",
-    question: "ليه في كلمة ((ANGGELOC)) حرف ال ((G)) الأول اتنطق ن؟",
+    question: "ليه في كلمة ((AGGELOC)) حرف ال ((G)) الأول اتنطق ن؟",
     options: [
       "علشان بعده حرف حلقى",
       "علشان متكرر",
       "علشان بعده حرف متحرك للكسر",
     ],
-    answer: 1,
+    answer: 0,
   },
   {
     id: 2_1014,
@@ -190,7 +190,7 @@ const MEDIUM_QUESTIONS = [
   {
     id: 2_1015,
     type: "mcq",
-    question: "يعني ايه كلمة {{ⲤⲞⲞⲨ Ⲛ̀ϪⲰⲘ}}؟",
+    question: "يعني ايه كلمة {{ⲤⲞⲞⲨ  Ⲛ̀ϪⲰⲘ}}؟",
     options: ["الكتب", "اقرا الكتب", "6 كتب"],
     answer: 2,
   },
@@ -210,7 +210,7 @@ const MEDIUM_QUESTIONS = [
   {
     id: 2_1017,
     type: "mcq",
-    question: "في كلمة {{Ϣ̀ⲐⲎⲚ}}، حرف ((Ⲑ)) هنا بينطق ايه؟",
+    question: "في كلمة {{ϢⲐⲎⲚ}}، حرف ((Ⲑ)) هنا بينطق ايه؟",
     options: ["ث", "ت"],
     answer: 1,
   },
@@ -266,7 +266,7 @@ const MEDIUM_QUESTIONS = [
   {
     id: 1_1009,
     type: "fill",
-    question: "أكمل: الحرف {{ⲮⲒⲦ}} رقمه ____.",
+    question: 'أكمل: كلمة (("IT)) تعبر عن رقم ____.',
     answer: "9",
   },
   {
@@ -329,7 +329,7 @@ const MEDIUM_QUESTIONS = [
     id: 3_1019,
     type: "truefalse",
     question: "كلمة {{ⲞⲨⲢⲰ}} يعني ملك.",
-    answer: true,
+    answer: false,
   },
   {
     id: 3_1020,
@@ -439,7 +439,7 @@ const HARD_QUESTIONS = [
     id: 3_1039,
     type: "truefalse",
     question:
-      "الكلمة اللي بييجي فيها حرف ((U)) بتكون كلمة يونانية زي كلمة ((UXOC)).",
+      'الكلمة اللي بييجي فيها حرف ((U)) ينطق ى بتكون كلمة يونانية زي كلمة (("U<OC)).',
     answer: true,
   },
   {
@@ -453,20 +453,21 @@ const HARD_QUESTIONS = [
     id: 3_1035,
     type: "truefalse",
     question:
-      "شعار المهرجان بالقبطي هو ((ⲧⲉⲛⲉⲣϩⲟⲩⲟ ϭⲣⲟ ⲉ̀ⲃⲟⲗ ϩⲓⲧⲉⲛ ⲫⲏⲉ̀ⲧⲁϥⲙⲉⲛⲣⲓⲧⲉⲛ)).",
+      "شعار المهرجان بالقبطي هو:\n((ⲧⲉⲛⲉⲣϩⲟⲩⲟ ϭⲣⲟ ⲉ̀ⲃⲟⲗ ϩⲓⲧⲉⲛ ⲫⲏⲉ̀ⲧⲁϥⲙⲉⲛⲣⲓⲧⲉⲛ)).",
     answer: true,
   },
   {
     id: 3_1034,
     type: "truefalse",
-    question: "((`en Pxc? Ihc? Pen_)) هي نفسها ((`en Pi`xrictoc Ihcouc Pen_)).",
+    question:
+      "الجملة دى \n {{'en Pxc? Ihc? Pen_}} \n تساوى \n {{'en Pi`xrictoc Ihcouc Pen_}}",
     answer: true,
   },
   {
     id: 3_1033,
     type: "truefalse",
     question:
-      "معنى ((alla na\\men `ebol \\a pipet\\wou)) هو: لكن نجنا من الشرير.",
+      "معنى جملة: \n ((alla nahmen `ebol ha pipethwou)) \n لكن نجنا من الشرير.",
     answer: true,
   },
   {
@@ -499,20 +500,20 @@ const HARD_QUESTIONS = [
     type: "mcq",
     question: "يعني ايه بالقبطي: لأن لك القوة والمجد إلى الأبد آمين؟",
     options: [
-      "`erwou. ouo\\ `mperenten `e'oun `epiracmoc alla",
-      "Je qwk te metouro nem jom nem pi`wou ]a `ene\\. `Amhn",
-      "|wn `ntenxw `ebol `nnh`ete ouon `ntan `erwou",
+      "{{`erwou. ouoh `mperenten `e'oun `epiracmoc alla}}",
+      "{{Je qwk te metouro nem jom nem pi`wou ]a `eneh. `Amhn}}",
+      "{{|wn `ntenxw `ebol `nnh`ete ouon `ntan `erwou}}",
     ],
     answer: 1,
   },
   {
     id: 2_1026,
     type: "mcq",
-    question: "يعني ايه بالقبطي: كما نحن أيضا نغفر لمن لنا عليه؟",
+    question: "يعني ايه بالقبطي: كما نغفر نحن أيضا للمذنبين الينا؟",
     options: [
-      "`m`vrh;. |wn `ntenxw `ebol `nnh`ete ouon `ntan `erwou",
-      "pete\\nak maref]wpi `m`vrh;",
-      "'en nivhou`i mareftoubo `nje pekran",
+      "{{`m`vrh;. |wn `ntenxw `ebol `nnh`ete ouon `ntan `erwou}}",
+      "{{pete\\nak maref]wpi `m`vrh;}}",
+      "{{'en nivhou`i mareftoubo `nje pekran}}",
     ],
     answer: 0,
   },
@@ -520,32 +521,32 @@ const HARD_QUESTIONS = [
     id: 3_1032,
     type: "truefalse",
     question:
-      "معنى ((Penwik `nte rac; mhif nan `mvoou)) هو: خبزنا الذي للغد أعطنا اليوم.",
+      "معنى \n ((Penwik `nte rac; mhif nan `mvoou)) \n هو: خبزنا الذي للغد أعطنا اليوم.",
     answer: true,
   },
   {
     id: 3_1031,
     type: "truefalse",
     question:
-      "معنى ((pete\\nak maref]wpi `m`vrh; 'en `tve nem \\ijen pika\\i)) هو: لتكن مشيئتك، كما في السماء كذلك على الأرض.",
+      "معنى \n {{petehnak maref]wpi `m`vrh; 'en `tve nem \\ijen pika\\i}} \n هو: لتكن مشيئتك، كما في السماء كذلك على الأرض.",
     answer: true,
   },
   {
     id: 1_1014,
     type: "fill",
-    question: "أكمل: يعني ايه ((ouo\\ `mperenten `e'oun `epiracmoc))؟ ____",
+    question: "أكمل: يعني ايه \n {{ouo\\ `mperenten `e'oun `epiracmoc}} ؟ ____",
     answer: "ولا تدخلنا في تجربة",
   },
   {
     id: 1_1013,
     type: "fill",
-    question: "أكمل: يعني ايه ((ouo\\ xa nhet`eron nan `ebol))؟ ____",
+    question: "أكمل: يعني ايه \n {{ouo\\ xa nhet`eron nan `ebol}} ؟ ____",
     answer: "واغفر لنا ذنوبنا",
   },
   {
     id: 1_1012,
     type: "fill",
-    question: "أكمل: يعني ايه ((marec`i `nje tekmetouro))؟ ____",
+    question: "أكمل: يعني ايه \n {{marec`i `nje tekmetouro}} ؟ ____",
     answer: "ليأت ملكوتك",
   },
   {
@@ -592,13 +593,13 @@ const HARD_QUESTIONS = [
     id: 3_1029,
     type: "truefalse",
     question:
-      "معنى ((ϫⲉⲙϯⲡⲓ ⲟⲥⲧⲉ ⲛⲧⲉⲧⲉⲛⲛⲁⲩ ϫⲉ ⲟⲩⲭⲣⲏⲥⲧⲟⲥ ⲡⲉ Ⲡϭⲟⲓⲥ)) هو: ذوقوا وانظروا ما أطيب الرب.",
+      "معنى \n ((ϫⲉⲙϯⲡⲓ ⲟⲥⲧⲉ ⲛⲧⲉⲧⲉⲛⲛⲁⲩ ϫⲉ ⲟⲩⲭⲣⲏⲥⲧⲟⲥ ⲡⲉ Ⲡϭⲟⲓⲥ)) \n ذوقوا وانظروا ما أطيب الرب.",
     answer: true,
   },
   {
     id: 2_1024,
     type: "mcq",
-    question: "يعني ايه ((ⲉⲩⲉⲣⲟⲩⲱⲓⲛⲓ ⲛϫⲉ ⲛⲓⲃⲁⲗ ⲛⲧⲉ ⲛⲉⲧⲉⲛϩⲏⲧ))؟",
+    question: "يعني ايه \n ((ⲉⲩⲉⲣⲟⲩⲱⲓⲛⲓ ⲛϫⲉ ⲛⲓⲃⲁⲗ ⲛⲧⲉ ⲛⲉⲧⲉⲛϩⲏⲧ))؟",
     options: [
       "مُسْتَنِيرَةً عُيُونُ أَذْهَانِكُمْ",
       "صَابِرِينَ فِي الضِّيقِ",
@@ -609,7 +610,7 @@ const HARD_QUESTIONS = [
   {
     id: 2_1023,
     type: "mcq",
-    question: "يعني ايه ((ⲁⲛⲟⲕ ⲡⲉ ⲡⲓⲱⲓⲕ ⲛⲧⲉ ⲡⲱⲛϧ))؟",
+    question: "يعني ايه \n ((ⲁⲛⲟⲕ ⲡⲉ ⲡⲓⲱⲓⲕ ⲛⲧⲉ ⲡⲱⲛϧ))؟",
     options: ["انا هو خبز الحياة", "انا هو الرب الهك", "انا معك حينما تذهب"],
     answer: 0,
   },
@@ -617,7 +618,7 @@ const HARD_QUESTIONS = [
     id: 3_1028,
     type: "truefalse",
     question:
-      "معنى ((Ouwnh `ebol `m`P[oic je ou`,ryctoc ou`aga;oc)) هو: اشكروا الرب لأنه صالح وخيِّر.",
+      "معنى \n ((Ouwnh `ebol `m`P[oic je ou`,ryctoc ou`aga;oc)) \n اشكروا الرب لأنه صالح وخيِّر.",
     answer: true,
   },
   {
@@ -629,7 +630,7 @@ const HARD_QUESTIONS = [
   {
     id: 2_1031,
     type: "mcq",
-    question: "يعني ايه ((ⲚⲈⲚⲀⲄⲄⲈⲖⲞⲤ Ⲛ̀ⲦⲈ ϮⲈⲔⲔⲖⲎⲤⲒⲀ))؟",
+    question: "يعني ايه \n ((NENAGGELOC NTE }EKKLYCIA)) ؟",
     options: ["خدام الكنيسة", "خدام المذبح", "ملائكة الكنيسة"],
     answer: 2,
   },

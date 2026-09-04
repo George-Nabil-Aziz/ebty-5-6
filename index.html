@@ -23,6 +23,24 @@
         <p id="quiz-notice" class="quiz-notice"></p>
         <p id="last-score" class="last-score"></p>
         <button id="start-btn" class="btn primary">ابدأ الكويز</button>
+
+        <!-- TEMP: أدوات تجربة بس، هتتشال قبل الإطلاق -->
+        <div class="debug-tools">
+          <button id="debug-all-btn" class="btn debug-btn" type="button">
+            🧪 اعرض كل الأسئلة
+          </button>
+          <div class="debug-goto">
+            <input
+              id="debug-question-id-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="رقم السؤال (مثال 2_1031)"
+            />
+            <button id="debug-goto-btn" class="btn debug-btn" type="button">
+              🧪 روح للسؤال
+            </button>
+          </div>
+        </div>
       </section>
 
       <!-- شاشة السؤال -->
@@ -30,6 +48,19 @@
         <div class="progress">
           <span id="progress-text"></span>
           <span id="timer" class="timer">15:00</span>
+        </div>
+
+        <!-- TEMP: شريط تجربة بيبين كل سؤال جاوبته صح ولا غلط -->
+        <div id="debug-answers-bar" class="debug-answers-bar"></div>
+
+        <!-- TEMP: أدوات تجربة بس، هتتشال قبل الإطلاق -->
+        <div class="debug-tools debug-nav">
+          <button id="debug-prev-btn" class="btn debug-btn" type="button">
+            ◀️ السابق
+          </button>
+          <button id="debug-next-btn" class="btn debug-btn" type="button">
+            التالي ▶️
+          </button>
         </div>
         <h2 id="question-text" dir="rtl"></h2>
         <div id="answer-area" dir="rtl"></div>
