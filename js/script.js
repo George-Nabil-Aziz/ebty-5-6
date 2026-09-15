@@ -26,6 +26,7 @@ const restartBtn = document.getElementById("restart-btn");
 const timerEl = document.getElementById("timer");
 const langToggleBtn = document.getElementById("lang-toggle");
 const themeToggleBtn = document.getElementById("theme-toggle");
+const keyboardLinkEl = document.getElementById("keyboard-link");
 const BEST_SCORE_KEY = "quiz_best_score";
 const LAST_SCORE_KEY = "quiz_last_score";
 const LAST_TOTAL_KEY = "quiz_last_total";
@@ -46,6 +47,7 @@ const TRANSLATIONS = {
     start: "ابدأ الكويز",
     next: "التالي",
     retry: "إعادة الكويز",
+    keyboardLink: "⌨️ كيبورد قبطي",
     true: "صح",
     false: "غلط",
     fillPlaceholder: "اكتب إجابتك هنا",
@@ -65,6 +67,7 @@ const TRANSLATIONS = {
     start: "Start",
     next: "Next",
     retry: "Retry",
+    keyboardLink: "⌨️ Coptic keyboard",
     true: "True",
     false: "False",
     fillPlaceholder: "Type your answer here",
@@ -84,6 +87,7 @@ const TRANSLATIONS = {
     start: "Commencer",
     next: "Suivant",
     retry: "Recommencer",
+    keyboardLink: "⌨️ Clavier copte",
     true: "Vrai",
     false: "Faux",
     fillPlaceholder: "Tapez votre réponse ici",
@@ -598,6 +602,7 @@ function applyLanguage(lang) {
   startBtn.textContent = t("start");
   nextBtn.textContent = t("next");
   restartBtn.textContent = t("retry");
+  keyboardLinkEl.textContent = t("keyboardLink");
 
   renderLastScoreText();
 

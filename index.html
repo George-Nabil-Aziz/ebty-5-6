@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz</title>
-    <link id="favicon" rel="icon" type="image/png" href="logo.png" />
-    <link rel="stylesheet" href="style.css" />
+    <link id="favicon" rel="icon" type="image/png" href="assets/img/logo.png" />
+    <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
     <div class="app">
       <div class="app-header" dir="ltr">
-        <img id="logo" src="logo.png" alt="Quiz Logo" class="logo" />
+        <img id="logo" src="assets/img/logo.png" alt="Quiz Logo" class="logo" />
         <div class="header-toggles">
           <button id="lang-toggle" class="toggle-btn" type="button">EN</button>
           <button id="theme-toggle" class="toggle-btn" type="button">🌙</button>
@@ -23,6 +23,9 @@
         <p id="quiz-notice" class="quiz-notice"></p>
         <p id="last-score" class="last-score"></p>
         <button id="start-btn" class="btn primary">ابدأ الكويز</button>
+        <a id="keyboard-link" href="pages/keyboard.html" class="page-link"
+          >⌨️ كيبورد قبطي</a
+        >
 
         <!-- TEMP: أدوات تجربة بس، هتتشال قبل الإطلاق -->
         <div class="debug-tools">
@@ -76,7 +79,7 @@
       </section>
     </div>
 
-    <script src="questions.js"></script>
-    <script src="script.js"></script>
+    <script src="js/questions.js"></script>
+    <script src="js/script.js"></script>
   </body>
 </html>

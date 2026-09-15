@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>كيبورد قبطي - الخط التاني</title>
+    <link id="favicon" rel="icon" type="image/png" href="../assets/img/logo.png" />
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/keyboard.css" />
+  </head>
+  <body class="kb-font-alt">
+    <div class="app app-wide">
+      <div class="app-header" dir="ltr">
+        <img id="logo" src="../assets/img/logo.png" alt="Logo" class="logo" />
+        <div class="header-toggles">
+          <button id="theme-toggle" class="toggle-btn" type="button">🌙</button>
+        </div>
+      </div>
+
+      <h1>كيبورد قبطي</h1>
+      <p class="kb-font-name">الخط التاني — CS Avva Shenouda</p>
+
+      <nav class="kb-nav">
+        <a href="keyboard.html">الخط الأول</a>
+        <a href="keyboard-alt.html" class="is-active">الخط التاني</a>
+        <a href="../index.html">الكويز</a>
+      </nav>
+
+      <textarea
+        id="kb-output"
+        class="kb-output"
+        dir="ltr"
+        spellcheck="false"
+        autocomplete="off"
+        placeholder="اكتب هنا..."
+      ></textarea>
+
+      <p class="kb-hint">
+        دوس على الأزرار أو اكتب من كيبورد جهازك على طول.
+      </p>
+
+      <div class="kb-actions">
+        <button id="kb-space" class="btn neutral" type="button">مسافة</button>
+        <button id="kb-back" class="btn neutral" type="button">⌫ مسح حرف</button>
+        <button id="kb-clear" class="btn neutral" type="button">مسح الكل</button>
+        <button id="kb-copy" class="btn primary copy" type="button">
+          📋 نسخ
+        </button>
+      </div>
+
+      <div id="kb-keys"></div>
+    </div>
+
+    <script src="../js/keyboard.js"></script>
+  </body>
+</html>
