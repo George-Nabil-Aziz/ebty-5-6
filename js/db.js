@@ -1,8 +1,8 @@
 // كل تعامل مع الداتابيز في الملف ده لوحده.
-// بيعتمد على: supabase (من CDN)، SUPABASE_URL و SUPABASE_ANON_KEY (config.js)،
+// بيعتمد على: supabase (من CDN)، SUPABASE_URL و SUPABASE_PUBLISHABLE_KEY (config.js)،
 // و rowToQuestion و QUESTION_TYPE_PREFIX (lib/quiz-core.js).
 
-const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 // الموقع لازم يتفتح من سيرفر (http/https)، مش بفتح الملف مباشرة من الجهاز.
 // من file:// المتصفح بيمنع الاتصال بـ Supabase وبيقفل crypto.randomUUID كمان،
