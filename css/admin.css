@@ -1,0 +1,180 @@
+/* صفحة الأدمن. بتكمّل على متغيرات الثيم اللي في css/style.css */
+
+body {
+  align-items: flex-start;
+}
+
+.admin {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.admin h1,
+.admin h2 {
+  margin: 0 0 12px;
+}
+
+.admin label {
+  display: block;
+  margin: 12px 0 4px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.admin input[type="text"],
+.admin input[type="email"],
+.admin input[type="password"],
+.admin select,
+.admin textarea {
+  font: inherit;
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.admin textarea {
+  max-width: 100%;
+  resize: vertical;
+}
+
+.admin input:focus,
+.admin select:focus,
+.admin textarea:focus {
+  outline: none;
+  border-color: var(--selected-border);
+}
+
+.admin .btn {
+  margin: 12px 6px 0 0;
+}
+
+.admin-error {
+  background: var(--wrong-bg);
+  border: 1px solid var(--wrong-border);
+  color: var(--danger);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+
+.admin-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tab-btn {
+  font: inherit;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tab-btn:hover {
+  border-color: var(--selected-border);
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* سطر في أي لستة (سؤال، محاولة، إحصائية) */
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.admin-row:hover {
+  background: var(--selected-bg);
+}
+
+.admin-row small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.admin-row .row-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admin-row .row-actions .btn {
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+.admin-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 6px 0 12px;
+  line-height: 1.7;
+}
+
+/* صف اختيار في فورم السؤال: زرار الراديو جنب خانة النص */
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.option-row input[type="radio"] {
+  flex-shrink: 0;
+  width: auto;
+  margin: 0;
+}
+
+.option-row input[type="text"] {
+  margin: 0;
+}
+
+#q-preview {
+  min-height: 48px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+}
+
+@media (max-width: 560px) {
+  .admin-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}

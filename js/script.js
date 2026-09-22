@@ -275,29 +275,6 @@ async function startQuiz() {
   startTimer();
 }
 
-function appendWithCopticMarkers(el, text) {
-  text.split(/(\{\{.+?\}\}|\(\(.+?\)\))/g).forEach((part) => {
-    const mainMatch = part.match(/^\{\{(.+)\}\}$/);
-    const altMatch = part.match(/^\(\((.+)\)\)$/);
-    if (mainMatch) {
-      const span = document.createElement("span");
-      span.className = "coptic-text";
-      span.textContent = mainMatch[1];
-      el.appendChild(span);
-    } else if (altMatch) {
-      const span = document.createElement("span");
-      span.className = "coptic-text-alt";
-      span.textContent = altMatch[1];
-      el.appendChild(span);
-    } else if (part) {
-      part.split("\n").forEach((line, i) => {
-        if (i > 0) el.appendChild(document.createElement("br"));
-        if (line) el.appendChild(document.createTextNode(line));
-      });
-    }
-  });
-}
-
 function renderQuestionText(el, q, numberPrefix) {
   el.innerHTML = "";
   if (numberPrefix) el.appendChild(document.createTextNode(numberPrefix));
