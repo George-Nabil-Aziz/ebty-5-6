@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبارات</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        padding: 24px;
+        line-height: 1.9;
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      .pass { color: #0a7d32; }
+      .fail { color: #c02626; font-weight: bold; }
+      code { background: #f0f0f0; padding: 2px 5px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>اختبارات الدوال الخالصة</h1>
+    <p>
+      كل سطر أخضر يعني نجح، وأحمر يعني فشل. نفس الاختبارات بتتشغّل من التيرمينال بـ
+      <code>node dev/run-tests.js</code>.
+    </p>
+    <div id="out"></div>
+
+    <script>
+      // عدّاد بسيط بدل مكتبة اختبارات — المشروع من غير npm عن قصد.
+      // لازم يتعرّف قبل ملف الاختبارات لأنه بينادي test() وقت التحميل.
+      let passed = 0;
+      let failed = 0;
+
+      function test(name, fn) {
+        const line = document.createElement("div");
+        try {
+          fn();
+          passed++;
+          line.className = "pass";
+          line.textContent = "✅ " + name;
+        } catch (e) {
+          failed++;
+          line.className = "fail";
+          line.textContent = "❌ " + name + " — " + e.message;
+        }
+        document.getElementById("out").appendChild(line);
+      }
+
+      function assertEqual(actual, expected, label) {
+        const a = JSON.stringify(actual);
+        const b = JSON.stringify(expected);
+        if (a !== b) {
+          throw new Error(
+            (label ? label + ": " : "") + `المتوقع ${b} والفعلي ${a}`,
+          );
+        }
+      }
+    </script>
+
+    <script src="../js/lib/quiz-core.js"></script>
+    <script src="quiz-core.tests.js"></script>
+
+    <script>
+      const summary = document.createElement("h2");
+      summary.textContent = `نجح ${passed} — فشل ${failed}`;
+      summary.className = failed === 0 ? "pass" : "fail";
+      document.getElementById("out").appendChild(summary);
+    </script>
+  </body>
+</html>
