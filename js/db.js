@@ -56,3 +56,40 @@ async function finishAttempt(attemptId, score, total) {
     .eq("id", attemptId);
   if (error) throw error;
 }
+
+// ---------- الأسئلة: للأدمن بس (محتاجة تسجيل دخول) ----------
+
+// أكبر id مستخدم لنوع معيّن، عشان nextQuestionId يحسب الرقم الجاي.
+// بيرجع null لو مفيش ولا سؤال من النوع ده.
+async function fetchMaxQuestionId(type) {
+  const prefix = QUESTION_TYPE_PREFIX[type];
+  const { data, error } = await db
+    .from("questions")
+    .select("id")
+    .gte("id", prefix * 10000)
+    .lt("id", (prefix + 1) * 10000)
+    .order("id", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  return data.length ? data[0].id : null;
+}
+
+async function saveQuestion(row) {
+  const { error } = await db.from("questions").upsert(row, { onConflict: "id" });
+  if (error) throw error;
+}
+
+// بترجع كل الأسئلة بما فيها المخفي — سياسة admin_manages_questions هي اللي بتسمح بده.
+async function fetchAllQuestions() {
+  const { data, error } = await db
+    .from("questions")
+    .select("id, type, difficulty, question, options, answer, lang, active")
+    .order("id");
+  if (error) throw error;
+  return data;
+}
+
+async function setQuestionActive(id, active) {
+  const { error } = await db.from("questions").update({ active }).eq("id", id);
+  if (error) throw error;
+}

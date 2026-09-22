@@ -69,9 +69,296 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
   btn.addEventListener("click", () => showAdminTab(btn.dataset.tab));
 });
 
-// التبويبات فاضية دلوقتي، بتتملى في الخطوات الجاية.
-function renderAddTab() {}
-function renderListTab() {}
+const TYPE_LABELS = {
+  mcq: "اختيار من متعدد",
+  truefalse: "صح وغلط",
+  fill: "أكمل",
+};
+const DIFFICULTY_LABELS = { easy: "سهل", medium: "متوسط", hard: "صعب" };
+
+// ===================== تبويب: إضافة / تعديل سؤال =====================
+
+// السؤال اللي بنعدله دلوقتي، أو null لو بنضيف جديد.
+let editingQuestion = null;
+
+function renderAddTab() {
+  const q = editingQuestion;
+  const container = document.getElementById("tab-add");
+
+  container.innerHTML = `
+    <h2>${q ? "تعديل سؤال " + formatQuestionId(q.id) : "إضافة سؤال جديد"}</h2>
+
+    <label for="q-type">النوع</label>
+    <select id="q-type">
+      <option value="mcq">اختيار من متعدد</option>
+      <option value="truefalse">صح وغلط</option>
+      <option value="fill">أكمل</option>
+    </select>
+
+    <label for="q-text">نص السؤال</label>
+    <textarea id="q-text" rows="3"></textarea>
+    <p class="admin-hint">
+      حط الحرف القبطي بين قوسين مزدوجين — مثال: الحرف {{ⲑ}} ينطق إزاي؟<br />
+      لو الرمز مش باين صح استخدم (( )) بدل {{ }}، دي بتستخدم الخط القبطي التاني.
+    </p>
+
+    <div id="q-answer-area"></div>
+
+    <label for="q-difficulty">الصعوبة</label>
+    <select id="q-difficulty">
+      <option value="easy">سهل</option>
+      <option value="medium">متوسط</option>
+      <option value="hard">صعب</option>
+    </select>
+
+    <label><input type="checkbox" id="q-cop-lang" /> نص السؤال كله قبطي</label>
+    <p class="admin-hint">
+      علّمها لو السؤال نفسه مكتوب بالقبطي كله. لحرف أو رمز جوه جملة عربية
+      استخدم {{ }} بدل ما تعلّمها.
+    </p>
+
+    <h3>معاينة</h3>
+    <div id="q-preview"></div>
+
+    <button id="q-save" class="btn primary" type="button">حفظ السؤال</button>
+    <button id="q-cancel" class="btn ${q ? "" : "hidden"}" type="button">إلغاء التعديل</button>
+  `;
+
+  const typeSelect = document.getElementById("q-type");
+  const textArea = document.getElementById("q-text");
+
+  if (q) {
+    typeSelect.value = q.type;
+    textArea.value = q.question;
+    document.getElementById("q-difficulty").value = q.difficulty;
+    document.getElementById("q-cop-lang").checked = q.lang === "cop";
+  }
+
+  renderAnswerFields(q);
+  renderPreview();
+
+  // تغيير النوع بيمسح الإجابة القديمة لأنها مش بتنفع للنوع الجديد
+  typeSelect.addEventListener("change", () => {
+    renderAnswerFields(null);
+    renderPreview();
+  });
+  textArea.addEventListener("input", renderPreview);
+  document.getElementById("q-save").addEventListener("click", saveFromForm);
+  document.getElementById("q-cancel").addEventListener("click", () => {
+    editingQuestion = null;
+    renderAddTab();
+  });
+}
+
+// خانات الإجابة بتتغير حسب النوع.
+function renderAnswerFields(q) {
+  const type = document.getElementById("q-type").value;
+  const area = document.getElementById("q-answer-area");
+
+  if (type === "mcq") {
+    area.innerHTML = `
+      <label>الاختيارات (علّم على الصح)</label>
+      <div id="q-options"></div>
+      <button id="q-add-option" class="btn" type="button">+ اختيار</button>
+    `;
+    const options = q && q.options ? q.options : ["", ""];
+    options.forEach((text, i) =>
+      addOptionRow(text, q ? q.answer === i : i === 0),
+    );
+    document
+      .getElementById("q-add-option")
+      .addEventListener("click", () => addOptionRow("", false));
+  } else if (type === "truefalse") {
+    area.innerHTML = `
+      <label for="q-tf-answer">الإجابة الصح</label>
+      <select id="q-tf-answer">
+        <option value="true">صح</option>
+        <option value="false">غلط</option>
+      </select>
+    `;
+    if (q) document.getElementById("q-tf-answer").value = String(q.answer);
+  } else {
+    area.innerHTML = `
+      <label for="q-fill-answer">الإجابة الصح</label>
+      <input id="q-fill-answer" type="text" />
+      <p class="admin-hint">
+        المقارنة بتتجاهل حالة الأحرف والمسافات الزيادة، وبتعامل أ/إ/آ/ا زي بعض،
+        وه/ة زي بعض، وي/ى زي بعض.
+      </p>
+    `;
+    if (q) document.getElementById("q-fill-answer").value = String(q.answer);
+  }
+}
+
+function addOptionRow(text, isCorrect) {
+  const row = document.createElement("div");
+  row.className = "option-row";
+
+  const radio = document.createElement("input");
+  radio.type = "radio";
+  radio.name = "q-correct";
+  radio.checked = isCorrect;
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "option-text";
+  input.value = text;
+
+  row.appendChild(radio);
+  row.appendChild(input);
+  document.getElementById("q-options").appendChild(row);
+}
+
+// معاينة بالخط القبطي، بتستخدم نفس دالة فك الترميز اللي في الامتحان.
+function renderPreview() {
+  const preview = document.getElementById("q-preview");
+  if (!preview) return;
+  preview.innerHTML = "";
+  appendWithCopticMarkers(preview, document.getElementById("q-text").value);
+}
+
+// بيقرا الفورم ويرجّع سؤال، أو يرمي غلطة برسالة واضحة.
+function readFormQuestion() {
+  const type = document.getElementById("q-type").value;
+  const question = document.getElementById("q-text").value.trim();
+  if (!question) throw new Error("اكتب نص السؤال.");
+
+  const base = { type, question };
+  if (document.getElementById("q-cop-lang").checked) base.lang = "cop";
+
+  if (type === "mcq") {
+    const rows = [...document.querySelectorAll(".option-row")];
+    const options = rows.map((r) => r.querySelector(".option-text").value.trim());
+    if (options.length < 2) throw new Error("لازم اختيارين على الأقل.");
+    if (options.some((o) => !o)) throw new Error("فيه اختيار فاضي.");
+    const answer = rows.findIndex(
+      (r) => r.querySelector("input[type=radio]").checked,
+    );
+    if (answer < 0) throw new Error("علّم على الإجابة الصح.");
+    return { ...base, options, answer };
+  }
+
+  if (type === "truefalse") {
+    return {
+      ...base,
+      answer: document.getElementById("q-tf-answer").value === "true",
+    };
+  }
+
+  const answer = document.getElementById("q-fill-answer").value.trim();
+  if (!answer) throw new Error("اكتب الإجابة الصح.");
+  return { ...base, answer };
+}
+
+async function saveFromForm() {
+  adminError("");
+  const saveBtn = document.getElementById("q-save");
+  saveBtn.disabled = true;
+  try {
+    const q = readFormQuestion();
+    q.id = editingQuestion
+      ? editingQuestion.id
+      : nextQuestionId(q.type, await fetchMaxQuestionId(q.type));
+
+    const row = questionToRow(q, document.getElementById("q-difficulty").value);
+    // التعديل ميرجّعش سؤال مخفي للظهور من غير قصد
+    if (editingQuestion) row.active = editingQuestion.active;
+
+    await saveQuestion(row);
+    editingQuestion = null;
+    alert("اتحفظ. رقم السؤال " + formatQuestionId(row.id));
+    renderAddTab();
+  } catch (e) {
+    adminError(e.message);
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+// ===================== تبويب: كل الأسئلة =====================
+
+async function renderListTab() {
+  const container = document.getElementById("tab-list");
+  container.innerHTML = "<p>جاري التحميل...</p>";
+  try {
+    const rows = await fetchAllQuestions();
+    container.innerHTML = `
+      <h2>كل الأسئلة (${rows.length})</h2>
+      <input id="q-search" type="text" placeholder="بحث في نص السؤال" />
+      <div id="q-list"></div>
+    `;
+
+    const listEl = document.getElementById("q-list");
+
+    function draw(filter) {
+      listEl.innerHTML = "";
+      const shown = rows.filter((r) => !filter || r.question.includes(filter));
+      if (shown.length === 0) {
+        listEl.innerHTML = "<p>مفيش سؤال مطابق.</p>";
+        return;
+      }
+      shown.forEach((r) => listEl.appendChild(buildQuestionRow(r)));
+    }
+
+    draw("");
+    document
+      .getElementById("q-search")
+      .addEventListener("input", (e) => draw(e.target.value.trim()));
+  } catch (e) {
+    adminError(e.message);
+  }
+}
+
+function buildQuestionRow(r) {
+  const row = document.createElement("div");
+  row.className = "admin-row";
+
+  const left = document.createElement("div");
+  const title = document.createElement("div");
+  appendWithCopticMarkers(title, r.question);
+  const meta = document.createElement("small");
+  meta.textContent =
+    `${formatQuestionId(r.id)} · ${TYPE_LABELS[r.type]} · ` +
+    `${DIFFICULTY_LABELS[r.difficulty]}${r.active ? "" : " · مخفي"}`;
+  left.appendChild(title);
+  left.appendChild(meta);
+
+  const actions = document.createElement("div");
+  actions.className = "row-actions";
+
+  const editBtn = document.createElement("button");
+  editBtn.type = "button";
+  editBtn.className = "btn";
+  editBtn.textContent = "تعديل";
+  editBtn.addEventListener("click", () => {
+    editingQuestion = r;
+    showAdminTab("add");
+  });
+
+  const toggleBtn = document.createElement("button");
+  toggleBtn.type = "button";
+  toggleBtn.className = "btn";
+  toggleBtn.textContent = r.active ? "إخفاء" : "إظهار";
+  toggleBtn.addEventListener("click", async () => {
+    toggleBtn.disabled = true;
+    try {
+      await setQuestionActive(r.id, !r.active);
+      renderListTab();
+    } catch (e) {
+      adminError(e.message);
+      toggleBtn.disabled = false;
+    }
+  });
+
+  actions.appendChild(editBtn);
+  actions.appendChild(toggleBtn);
+
+  row.appendChild(left);
+  row.appendChild(actions);
+  return row;
+}
+
+// بتتملى في الخطوات الجاية.
 function renderAttemptsTab() {}
 function renderStatsTab() {}
 
