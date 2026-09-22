@@ -93,3 +93,46 @@ async function setQuestionActive(id, active) {
   const { error } = await db.from("questions").update({ active }).eq("id", id);
   if (error) throw error;
 }
+
+// ---------- المحاولات: للأدمن بس ----------
+
+async function fetchAttempts(nameFilter) {
+  let query = db
+    .from("attempts")
+    .select("id, student_name, started_at, finished_at, score, total")
+    .order("started_at", { ascending: false })
+    .limit(500);
+  if (nameFilter) query = query.ilike("student_name", `%${nameFilter}%`);
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
+}
+
+// بيجيب إجابات محاولة واحدة ومعاها بيانات كل سؤال، مرتبة بترتيب الامتحان الأصلي.
+async function fetchAttemptAnswers(attemptId) {
+  const { data, error } = await db
+    .from("attempt_answers")
+    .select(
+      "position, given_answer, is_correct, " +
+        "questions ( id, type, question, options, answer, lang )",
+    )
+    .eq("attempt_id", attemptId)
+    .order("position");
+  if (error) throw error;
+  return data;
+}
+
+// ---------- الإحصائية: للأدمن بس ----------
+
+// بتقرا من العرض question_stats. الأسئلة اللي اتجاوبت أقل من minAnswers مرة
+// بتتستبعد، لأن نسبة مبنية على إجابة أو اتنين مالهاش معنى.
+async function fetchQuestionStats(minAnswers) {
+  const { data, error } = await db
+    .from("question_stats")
+    .select("id, question, difficulty, times_answered, times_wrong, wrong_pct")
+    .gte("times_answered", minAnswers)
+    .order("wrong_pct", { ascending: false })
+    .limit(100);
+  if (error) throw error;
+  return data;
+}

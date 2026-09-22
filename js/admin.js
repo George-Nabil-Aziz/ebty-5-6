@@ -358,9 +358,196 @@ function buildQuestionRow(r) {
   return row;
 }
 
-// بتتملى في الخطوات الجاية.
-function renderAttemptsTab() {}
-function renderStatsTab() {}
+// ===================== تبويب: المحاولات =====================
+
+const TRUEFALSE_LABELS = { true: "✅ صح", false: "❌ غلط" };
+
+function formatDateTime(iso) {
+  return new Date(iso).toLocaleString("ar-EG", {
+    day: "numeric",
+    month: "long",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatScore(a) {
+  return a.finished_at ? `${a.score} / ${a.total}` : "ما خلصش";
+}
+
+// إجابة الطالب بشكل مقروء
+function displayGiven(q, given) {
+  if (given === null || given === undefined) return "لم تتم الإجابة";
+  if (q.type === "mcq") return q.options[given] ?? "لم تتم الإجابة";
+  if (q.type === "truefalse") return TRUEFALSE_LABELS[given];
+  return String(given);
+}
+
+function displayCorrect(q) {
+  if (q.type === "mcq") return q.options[q.answer];
+  if (q.type === "truefalse") return TRUEFALSE_LABELS[q.answer];
+  return String(q.answer);
+}
+
+async function renderAttemptsTab() {
+  const container = document.getElementById("tab-attempts");
+  container.innerHTML = `
+    <h2>المحاولات</h2>
+    <input id="attempt-search" type="text" placeholder="بحث بالاسم" />
+    <div id="attempt-list"><p>جاري التحميل...</p></div>
+  `;
+
+  const listEl = document.getElementById("attempt-list");
+
+  async function draw(nameFilter) {
+    listEl.innerHTML = "<p>جاري التحميل...</p>";
+    try {
+      const rows = await fetchAttempts(nameFilter);
+      listEl.innerHTML = "";
+      if (rows.length === 0) {
+        listEl.innerHTML = nameFilter
+          ? "<p>مفيش محاولة بالاسم ده.</p>"
+          : "<p>مفيش محاولات لسه.</p>";
+        return;
+      }
+      rows.forEach((a) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "admin-row";
+
+        const name = document.createElement("strong");
+        name.textContent = a.student_name;
+
+        const meta = document.createElement("span");
+        meta.textContent = `${formatDateTime(a.started_at)} — ${formatScore(a)}`;
+
+        btn.appendChild(name);
+        btn.appendChild(meta);
+        btn.addEventListener("click", () => showAttemptDetail(a));
+        listEl.appendChild(btn);
+      });
+    } catch (e) {
+      adminError(e.message);
+      listEl.innerHTML = "";
+    }
+  }
+
+  // تأخير بسيط عشان ميضربش استعلام مع كل حرف
+  let searchTimer = null;
+  document.getElementById("attempt-search").addEventListener("input", (e) => {
+    clearTimeout(searchTimer);
+    const value = e.target.value.trim();
+    searchTimer = setTimeout(() => draw(value), 300);
+  });
+
+  draw("");
+}
+
+async function showAttemptDetail(attempt) {
+  const container = document.getElementById("tab-attempts");
+  container.innerHTML = "<p>جاري التحميل...</p>";
+  try {
+    const answers = await fetchAttemptAnswers(attempt.id);
+
+    container.innerHTML = "";
+
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "btn";
+    back.textContent = "‹ رجوع للمحاولات";
+    back.addEventListener("click", renderAttemptsTab);
+    container.appendChild(back);
+
+    const head = document.createElement("h2");
+    head.textContent =
+      `${attempt.student_name} — ${formatDateTime(attempt.started_at)} — ` +
+      formatScore(attempt);
+    container.appendChild(head);
+
+    if (answers.length === 0) {
+      const empty = document.createElement("p");
+      empty.textContent = "المحاولة دي مفيهاش أي إجابة.";
+      container.appendChild(empty);
+      return;
+    }
+
+    answers.forEach((a) => {
+      const q = a.questions;
+      const item = document.createElement("div");
+      item.className = `review-item ${a.is_correct ? "correct" : "wrong"}`;
+
+      const qEl = document.createElement("div");
+      qEl.className = "q";
+      appendWithCopticMarkers(
+        qEl,
+        `${a.is_correct ? "✅" : "❌"} ${a.position}. ${q.question}`,
+      );
+
+      const aEl = document.createElement("div");
+      aEl.className = "a";
+      const line = a.is_correct
+        ? `إجابته: ${displayGiven(q, a.given_answer)}`
+        : `إجابته: ${displayGiven(q, a.given_answer)} — الصح: ${displayCorrect(q)}`;
+      appendWithCopticMarkers(aEl, line);
+
+      item.appendChild(qEl);
+      item.appendChild(aEl);
+      container.appendChild(item);
+    });
+  } catch (e) {
+    adminError(e.message);
+  }
+}
+
+// ===================== تبويب: أصعب الأسئلة =====================
+
+// أقل عدد إجابات عشان النسبة يبقى ليها معنى
+const MIN_ANSWERS_FOR_STATS = 5;
+
+async function renderStatsTab() {
+  const container = document.getElementById("tab-stats");
+  container.innerHTML = "<p>جاري التحميل...</p>";
+  try {
+    const rows = await fetchQuestionStats(MIN_ANSWERS_FOR_STATS);
+
+    container.innerHTML = `
+      <h2>أصعب الأسئلة على الناس</h2>
+      <p class="admin-hint">
+        مرتبة بنسبة الغلط. الأسئلة اللي اتجاوبت أقل من
+        ${MIN_ANSWERS_FOR_STATS} مرات مش ظاهرة هنا، لأن النسبة ساعتها مالهاش معنى.
+      </p>
+      <div id="stats-list"></div>
+    `;
+
+    const listEl = document.getElementById("stats-list");
+    if (rows.length === 0) {
+      listEl.innerHTML = "<p>لسه مفيش إجابات كفاية عشان تطلع إحصائية.</p>";
+      return;
+    }
+
+    rows.forEach((r) => {
+      const row = document.createElement("div");
+      row.className = "admin-row";
+
+      const left = document.createElement("div");
+      const title = document.createElement("div");
+      appendWithCopticMarkers(title, r.question);
+      const meta = document.createElement("small");
+      meta.textContent = `${formatQuestionId(r.id)} · ${DIFFICULTY_LABELS[r.difficulty]}`;
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const pct = document.createElement("strong");
+      pct.textContent = `غلط ${r.wrong_pct}٪ (${r.times_wrong}/${r.times_answered})`;
+
+      row.appendChild(left);
+      row.appendChild(pct);
+      listEl.appendChild(row);
+    });
+  } catch (e) {
+    adminError(e.message);
+  }
+}
 
 // الجلسة محفوظة في localStorage، فلو داخل من قبل مبيسألش تاني.
 db.auth.getSession().then(({ data }) => showLoggedIn(Boolean(data.session)));
