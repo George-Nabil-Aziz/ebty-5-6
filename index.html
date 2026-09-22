@@ -22,6 +22,18 @@
         <h1 id="app-title">الكويز</h1>
         <p id="quiz-notice" class="quiz-notice"></p>
         <p id="last-score" class="last-score"></p>
+
+        <div class="name-field">
+          <label id="student-name-label" for="student-name">اسمك</label>
+          <input
+            id="student-name"
+            type="text"
+            maxlength="60"
+            autocomplete="name"
+            dir="auto"
+          />
+        </div>
+
         <button id="start-btn" class="btn primary">ابدأ الكويز</button>
         <a id="keyboard-link" href="pages/keyboard.html" class="page-link"
           >⌨️ كيبورد قبطي</a
@@ -79,7 +91,10 @@
       </section>
     </div>
 
-    <script src="js/questions.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/lib/quiz-core.js"></script>
+    <script src="js/db.js"></script>
     <script src="js/script.js"></script>
   </body>
 </html>

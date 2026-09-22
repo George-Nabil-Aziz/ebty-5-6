@@ -7,6 +7,8 @@ const resultTitleEl = document.getElementById("result-title");
 const quizNoticeEl = document.getElementById("quiz-notice");
 const lastScoreEl = document.getElementById("last-score");
 const startBtn = document.getElementById("start-btn");
+const studentNameInput = document.getElementById("student-name");
+const studentNameLabel = document.getElementById("student-name-label");
 // TEMP: أدوات تجربة، هتتشال قبل الإطلاق
 // خليها true عشان ترجّع أدوات التجربة (الأزرار + شريط الإجابات + id السؤال)
 const DEBUG_TOOLS = false;
@@ -30,6 +32,7 @@ const keyboardLinkEl = document.getElementById("keyboard-link");
 const BEST_SCORE_KEY = "quiz_best_score";
 const LAST_SCORE_KEY = "quiz_last_score";
 const LAST_TOTAL_KEY = "quiz_last_total";
+const STUDENT_NAME_KEY = "quiz_student_name";
 const LANG_KEY = "quiz_lang";
 const THEME_KEY = "quiz_theme";
 const QUIZ_DURATION_SECONDS = 15 * 60;
@@ -59,6 +62,10 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `آخر نتيجة: ${score}/${total}`,
     notice:
       "تنبيه: بعد ما تجاوب على أي سؤال مفيش رجوع فيه. في وقت بيعد قدره 15 دقيقة. حل على اد ما تقدر ومتخافش.",
+    nameLabel: "اسمك",
+    nameRequired: "اكتب اسمك الأول",
+    loading: "جاري التحميل...",
+    loadError: "مش قادر يحمّل الأسئلة. اتأكد إن فيه إنترنت وجرب تاني.",
   },
   en: {
     dir: "ltr",
@@ -79,6 +86,11 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `Last score: ${score}/${total}`,
     notice:
       "Note: once you answer a question, there's no going back. A 15-minute countdown timer is running. Answer as much as you can, and don't worry.",
+    nameLabel: "Your name",
+    nameRequired: "Please enter your name first",
+    loading: "Loading...",
+    loadError:
+      "Couldn't load the questions. Check your connection and try again.",
   },
   fr: {
     dir: "ltr",
@@ -99,6 +111,11 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `Dernier score : ${score}/${total}`,
     notice:
       "Remarque : une fois que vous répondez à une question, il n'y a pas de retour en arrière. Un compte à rebours de 15 minutes est actif. Répondez du mieux que vous pouvez, sans vous inquiéter.",
+    nameLabel: "Votre nom",
+    nameRequired: "Veuillez d'abord saisir votre nom",
+    loading: "Chargement...",
+    loadError:
+      "Impossible de charger les questions. Vérifiez votre connexion et réessayez.",
   },
 };
 
@@ -108,7 +125,14 @@ let userAnswers = [];
 let selectedAnswer = null;
 let timerInterval = null;
 let secondsLeft = QUIZ_DURATION_SECONDS;
-let quizQuestions = QUESTIONS;
+let quizQuestions = [];
+
+// كل الأسئلة النشطة، بتتملى من الداتابيز أول ما يدوس "ابدأ".
+// أدوات التجربة بتستخدمها عشان تعرض كل الأسئلة بترتيبها.
+let allQuestions = [];
+
+// المحاولة الشغالة دلوقتي، عشان نربط بيها كل إجابة. null قبل ما الامتحان يبدأ.
+let currentAttemptId = null;
 
 // عدد الأسئلة اللي بتتسحب من كل مستوى في كل امتحان (لو المتاح أقل، بياخد المتاح).
 const QUOTAS = { easy: 10, medium: 20, hard: 10 };
@@ -124,9 +148,9 @@ function shuffle(array) {
 }
 
 // كل مستوى بيتخلط جوه نفسه، والمستويات بتتراكم بالترتيب: easy ثم medium ثم hard.
-function buildQuizOrder() {
+function buildQuizOrder(byDifficulty) {
   return LEVELS.flatMap((level) =>
-    shuffle(QUESTIONS_BY_DIFFICULTY[level]).slice(0, QUOTAS[level]),
+    shuffle(byDifficulty[level]).slice(0, QUOTAS[level]),
   );
 }
 
@@ -174,6 +198,8 @@ function renderLastScoreText() {
 function renderStartScreen() {
   quizNoticeEl.textContent = t("notice");
   renderLastScoreText();
+  // الاسم محفوظ من آخر مرة عشان ميكتبوش تاني لو حل من نفس الجهاز
+  studentNameInput.value = localStorage.getItem(STUDENT_NAME_KEY) || "";
   showScreen(startScreen);
 }
 
@@ -202,9 +228,45 @@ function stopTimer() {
   clearInterval(timerInterval);
 }
 
-function startQuiz() {
+// بيحمّل كل الأسئلة النشطة من الداتابيز ويحطها في allQuestions،
+// وبيرجّع نفس النتيجة مقسومة على المستويات عشان buildQuizOrder.
+async function loadQuestions() {
+  const byDifficulty = await fetchQuestionsByDifficulty();
+  allQuestions = [
+    ...byDifficulty.easy,
+    ...byDifficulty.medium,
+    ...byDifficulty.hard,
+  ];
+  return byDifficulty;
+}
+
+async function startQuiz() {
+  const name = studentNameInput.value.trim();
+  if (!name) {
+    alert(t("nameRequired"));
+    studentNameInput.focus();
+    return;
+  }
+  localStorage.setItem(STUDENT_NAME_KEY, name);
+
+  const originalLabel = startBtn.textContent;
+  startBtn.disabled = true;
+  startBtn.textContent = t("loading");
+
+  try {
+    const byDifficulty = await loadQuestions();
+    quizQuestions = buildQuizOrder(byDifficulty);
+    currentAttemptId = await createAttempt(name, quizQuestions.length);
+  } catch (e) {
+    console.error(e);
+    alert(t("loadError"));
+    return;
+  } finally {
+    startBtn.disabled = false;
+    startBtn.textContent = originalLabel;
+  }
+
   debugBrowsing = false; // TEMP: هيتشال مع أدوات التجربة
-  quizQuestions = buildQuizOrder();
   currentIndex = 0;
   userAnswers = [];
   selectedAnswer = null;
@@ -529,6 +591,14 @@ function handleNext() {
 
   userAnswers[currentIndex] = { question: q, given, correct };
 
+  // التسجيل best-effort: لو الشبكة وقعت، الامتحان بيكمل عادي على الطالب
+  // والغلطة بتتسجل في الكونسول بس.
+  if (currentAttemptId) {
+    recordAnswer(currentAttemptId, q.id, currentIndex + 1, given, correct).catch(
+      (e) => console.warn("تسجيل الإجابة فشل", e),
+    );
+  }
+
   currentIndex++;
   if (currentIndex < quizQuestions.length) {
     renderQuestion();
@@ -584,6 +654,12 @@ function showResult() {
   setBestScore(score);
   setLastScore(score, userAnswers.length);
 
+  if (currentAttemptId) {
+    finishAttempt(currentAttemptId, score, userAnswers.length).catch((e) =>
+      console.warn("قفل المحاولة فشل", e),
+    );
+  }
+
   renderResult();
   showScreen(resultScreen);
 }
@@ -600,6 +676,7 @@ function applyLanguage(lang) {
   quizNoticeEl.textContent = t("notice");
   resultTitleEl.textContent = t("resultTitle");
   startBtn.textContent = t("start");
+  studentNameLabel.textContent = t("nameLabel");
   nextBtn.textContent = t("next");
   restartBtn.textContent = t("retry");
   keyboardLinkEl.textContent = t("keyboardLink");
@@ -696,11 +773,13 @@ function debugRender() {
 }
 
 // startId اختياري: لو موجود بيفتح على السؤال ده بدل الأول
-function debugBrowse(startId) {
+async function debugBrowse(startId) {
+  if (allQuestions.length === 0) await loadQuestions();
+
   let index = 0;
 
   if (startId !== undefined) {
-    index = QUESTIONS.findIndex((q) => q.id === startId);
+    index = allQuestions.findIndex((q) => q.id === startId);
     if (index < 0) {
       alert("مفيش سؤال بالرقم ده");
       return;
@@ -708,7 +787,7 @@ function debugBrowse(startId) {
   }
 
   debugBrowsing = true;
-  quizQuestions = QUESTIONS;
+  quizQuestions = allQuestions;
   currentIndex = index;
   userAnswers = [];
   selectedAnswer = null;
@@ -720,10 +799,10 @@ function debugBrowse(startId) {
 function debugGoto() {
   const digits = debugQuestionIdInput.value.replace(/\D/g, "");
   if (!digits) return;
-  debugBrowse(Number(digits));
+  debugBrowse(Number(digits)).catch(console.error);
 }
 
-debugAllBtn.addEventListener("click", () => debugBrowse());
+debugAllBtn.addEventListener("click", () => debugBrowse().catch(console.error));
 debugGotoBtn.addEventListener("click", debugGoto);
 
 debugQuestionIdInput.addEventListener("keydown", (e) => {

@@ -428,3 +428,34 @@ input[type="text"]:focus {
   border-color: var(--selected-border);
   box-shadow: 0 0 0 2px var(--selected-border);
 }
+
+/* خانة اسم الطالب في شاشة البداية */
+.name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto 16px;
+  text-align: start;
+}
+
+.name-field label {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.name-field input {
+  font: inherit;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.name-field input:focus {
+  outline: none;
+  border-color: var(--selected-border);
+}
