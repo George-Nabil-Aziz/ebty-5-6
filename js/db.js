@@ -4,6 +4,24 @@
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// الموقع لازم يتفتح من سيرفر (http/https)، مش بفتح الملف مباشرة من الجهاز.
+// من file:// المتصفح بيمنع الاتصال بـ Supabase وبيقفل crypto.randomUUID كمان،
+// والرسالة اللي بتطلع من غير التنبيه ده مبتوضّحش السبب خالص.
+if (location.protocol === "file:") {
+  const message =
+    "الصفحة مفتوحة من الجهاز مباشرة، فالمتصفح بيمنع الاتصال بالداتابيز. " +
+    "شغّل سيرفر محلي من جذر المشروع (مثلاً: npx serve) وافتح اللينك اللي هيطلعلك.";
+  console.error(message);
+  document.addEventListener("DOMContentLoaded", () => {
+    const banner = document.createElement("p");
+    banner.textContent = message;
+    banner.style.cssText =
+      "margin:0;padding:12px 16px;background:#fdecec;color:#c02626;" +
+      "font:16px/1.7 system-ui,sans-serif;text-align:center;direction:rtl";
+    document.body.prepend(banner);
+  });
+}
+
 // ---------- الأسئلة: للطالب ----------
 
 // بيجيب الأسئلة النشطة مقسومة على المستويات، بنفس شكل QUESTIONS_BY_DIFFICULTY القديم.
