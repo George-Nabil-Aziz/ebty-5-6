@@ -24,7 +24,12 @@ create policy admin_updates_attempts on attempts
   for update to authenticated using (true) with check (true);
 
 -- ---------- ٣. نتيجة المحاولة بتوري التعليم ----------
-create or replace view attempt_results with (security_invoker = true) as
+-- لازم نمسح العرض الأول: Postgres مش بيسمح بإضافة عمود في نص عرض موجود
+-- بـ create or replace (بيقول: cannot change name of view column).
+-- مفيش حاجة تانية معتمدة على العرض ده، فمسحه آمن.
+drop view if exists attempt_results;
+
+create view attempt_results with (security_invoker = true) as
 select
   a.id,
   a.student_name,
@@ -40,6 +45,7 @@ left join attempt_answers aa on aa.attempt_id = a.id
 group by a.id, a.student_name, a.started_at, a.total, a.is_practice;
 
 -- ---------- ٤. الإحصائية بتتجاهل المحاولات التجريبية ----------
+-- أعمدته مش بتتغير، فـ create or replace كفاية هنا.
 create or replace view question_stats with (security_invoker = true) as
 select
   q.id,

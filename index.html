@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz</title>
     <link id="favicon" rel="icon" type="image/png" href="assets/img/logo.png" />
-    <link rel="stylesheet" href="css/style.css?v=7" />
+    <link rel="stylesheet" href="css/style.css?v=8" />
   </head>
   <body>
     <div class="app">
@@ -55,12 +55,7 @@
 
         <h2 id="question-text" dir="rtl"></h2>
         <div id="answer-area" dir="rtl"></div>
-        <div class="quiz-actions">
-          <button id="next-btn" class="btn primary">التالي</button>
-          <button id="finish-btn" class="btn btn-quiet" type="button">
-            إنهاء الامتحان
-          </button>
-        </div>
+        <button id="next-btn" class="btn primary">التالي</button>
 
         <!-- ===== أدوات التجربة: تحت خالص، وبتظهر للأدمن المسجّل دخول بس ===== -->
 
@@ -104,6 +99,12 @@
             </button>
           </div>
         </div>
+
+        <!-- إنهاء الامتحان تحت خالص وبعيد عن زراير "التالي"،
+             عشان محدش يدوسه وهو قاصد يكمّل -->
+        <button id="finish-btn" class="btn btn-quiet" type="button">
+          إنهاء الامتحان
+        </button>
       </section>
 
       <!-- شاشة النتيجة -->
@@ -116,10 +117,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js?v=7"></script>
-    <script src="js/lib/quiz-core.js?v=7"></script>
-    <script src="js/lib/coptic-markup.js?v=7"></script>
-    <script src="js/db.js?v=7"></script>
-    <script src="js/script.js?v=7"></script>
+    <script src="js/config.js?v=8"></script>
+    <script src="js/lib/quiz-core.js?v=8"></script>
+    <script src="js/lib/coptic-markup.js?v=8"></script>
+    <script src="js/db.js?v=8"></script>
+    <script src="js/script.js?v=8"></script>
   </body>
 </html>

@@ -489,23 +489,16 @@ input[type="text"]:focus {
   border-color: var(--selected-border);
 }
 
-/* زرار "التالي" وجنبه "إنهاء الامتحان" */
-.quiz-actions {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.quiz-actions .btn.primary {
-  flex: 1;
-}
-
-/* الإنهاء مش الحاجة الأساسية، فشكله أهدى من "التالي" */
+/* "إنهاء الامتحان" تحت خالص وبعيد عن "التالي"، وشكله أهدى منه
+   عشان محدش يدوسه وهو قاصد يكمّل */
 .btn.btn-quiet {
-  flex-shrink: 0;
+  display: block;
+  width: 100%;
+  margin-top: 28px;
   background: transparent;
   color: var(--muted);
   border: 1px solid var(--border);
+  font-size: 14px;
 }
 
 .btn.btn-quiet:hover {

@@ -112,7 +112,11 @@ create policy admin_reads_answers on attempt_answers
 -- نتيجة كل محاولة، محسوبة من إجاباتها
 -- =====================================================================
 
-create or replace view attempt_results with (security_invoker = true) as
+-- بنمسح ونعمل من أول بدل create or replace: ده بيسمح إن أعمدة العرض
+-- تتغير لو الملف اتشغّل تاني بعد تعديل، وده اللي create or replace بيرفضه.
+drop view if exists attempt_results;
+
+create view attempt_results with (security_invoker = true) as
 select
   a.id,
   a.student_name,
@@ -133,7 +137,9 @@ group by a.id, a.student_name, a.started_at, a.total, a.is_practice;
 -- مش هيقدر يقرا منه لأنه ممنوع من قراءة attempt_answers أصلاً.
 -- =====================================================================
 
-create or replace view question_stats with (security_invoker = true) as
+drop view if exists question_stats;
+
+create view question_stats with (security_invoker = true) as
 select
   q.id,
   q.question,
