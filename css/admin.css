@@ -417,6 +417,8 @@ body {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  /* من غيرها الزرار بينكسر على سطرين لما المساحة تضيق */
+  white-space: nowrap;
 }
 
 /* البحث والفلترة */
