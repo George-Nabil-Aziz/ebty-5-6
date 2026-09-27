@@ -9,9 +9,11 @@ const lastScoreEl = document.getElementById("last-score");
 const startBtn = document.getElementById("start-btn");
 const studentNameInput = document.getElementById("student-name");
 const studentNameLabel = document.getElementById("student-name-label");
-// TEMP: أدوات تجربة، هتتشال قبل الإطلاق
-// خليها true عشان ترجّع أدوات التجربة (الأزرار + شريط الإجابات + id السؤال)
-const DEBUG_TOOLS = false;
+// أدوات التجربة (الأزرار + شريط الإجابات + id السؤال) بتظهر للأدمن بس.
+// "أدمن" = مسجّل دخول في Supabase من صفحة الإدارة. الجلسة محفوظة في
+// المتصفح على نفس النطاق، فالصفحة دي بتشوفها.
+// خليها true لو عايز تجربها من غير ما تسجل دخول.
+let DEBUG_TOOLS = false;
 const debugAllBtn = document.getElementById("debug-all-btn");
 const debugPrevBtn = document.getElementById("debug-prev-btn");
 const debugNextBtn = document.getElementById("debug-next-btn");
@@ -791,12 +793,30 @@ debugNextBtn.addEventListener("click", () => {
   debugGoToIndex(Math.min(quizQuestions.length - 1, currentIndex + 1));
 });
 
-// لو الأدوات مقفولة، نخفي كل عناصرها من الصفحة
-if (!DEBUG_TOOLS) {
+// بتتنده مرتين: مرة وقت التحميل (مخفية)، ومرة بعد ما نعرف إن فيه
+// أدمن مسجّل دخول (بتظهر).
+function applyDebugToolsVisibility() {
   document
     .querySelectorAll(".debug-tools, #debug-answers-bar")
-    .forEach((el) => (el.hidden = true));
+    .forEach((el) => (el.hidden = !DEBUG_TOOLS));
 }
+
+applyDebugToolsVisibility();
+
+// فحص الجلسة غير متزامن، فالأدوات بتفضل مخفية لحد ما يرجع الرد.
+// لو حصل أي غلط، بتفضل مخفية — وده الوضع الآمن.
+db.auth
+  .getSession()
+  .then(({ data }) => {
+    if (!data.session) return;
+    DEBUG_TOOLS = true;
+    applyDebugToolsVisibility();
+    if (!quizScreen.classList.contains("hidden")) {
+      setProgressText();
+      renderDebugAnswersBar();
+    }
+  })
+  .catch((e) => console.warn("فحص جلسة الأدمن فشل", e));
 // ===== نهاية أدوات التجربة =====
 
 startBtn.addEventListener("click", startQuiz);

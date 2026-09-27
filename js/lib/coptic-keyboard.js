@@ -156,3 +156,16 @@ function deleteBackFromField(field) {
   field.focus({ preventScroll: true });
   field.dispatchEvent(new Event("input", { bubbles: true }));
 }
+
+// بتكتب حرف قبطي وبتحط الأقواس المناسبة لوحدها.
+// open/close: "{{" و "}}" للخط الأول، "((" و "))" للتاني.
+// محتاجة computeMarkerInsert من lib/quiz-core.js.
+function insertCopticChar(field, char, open, close) {
+  const start = field.selectionStart ?? field.value.length;
+  const end = field.selectionEnd ?? field.value.length;
+  const result = computeMarkerInsert(field.value, start, end, char, open, close);
+  field.value = result.value;
+  field.setSelectionRange(result.caret, result.caret);
+  field.focus({ preventScroll: true });
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+}

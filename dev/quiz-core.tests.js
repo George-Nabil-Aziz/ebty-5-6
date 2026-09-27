@@ -159,3 +159,56 @@ test("formatQuestionId: بيحط الشرطة السفلية زي questions.js",
   assertEqual(formatQuestionId(11016), "1_1016");
   assertEqual(formatQuestionId(31052), "3_1052");
 });
+
+// ===== computeMarkerInsert: الكيبورد بيحط الأقواس بنفسه =====
+// لما تكتب بالخط الأول، الحرف لازم يبقى جوه {{ }} عشان يتعرض قبطي.
+// الدالة دي بتقرر: أحط قوسين جداد ولا الحرف يدخل على اللي مفتوح؟
+
+const M1 = ["{{", "}}"]; // الخط الأول
+const M2 = ["((", "))"]; // الخط التاني
+
+// مساعد بيخلي الاختبارات مقروءة: | بتمثل مكان المؤشر
+function typeAt(text, char, markers) {
+  const caret = text.indexOf("|");
+  const value = text.replace("|", "");
+  const r = computeMarkerInsert(value, caret, caret, char, markers[0], markers[1]);
+  return r.value.slice(0, r.caret) + "|" + r.value.slice(r.caret);
+}
+
+test("computeMarkerInsert: أول حرف بيتحط جوه قوسين جداد", () => {
+  assertEqual(typeAt("|", "a", M1), "{{a|}}");
+});
+
+test("computeMarkerInsert: الحرف اللي بعده بيدخل على نفس القوسين", () => {
+  assertEqual(typeAt("{{a|}}", "b", M1), "{{ab|}}");
+});
+
+test("computeMarkerInsert: الكتابة بعد القوسين بتفتح قوسين جداد", () => {
+  assertEqual(typeAt("{{ab}}|", "c", M1), "{{ab}}{{c|}}");
+});
+
+test("computeMarkerInsert: بيشتغل في نص جملة عربي", () => {
+  assertEqual(typeAt("الحرف | ينطق ازاي؟", "q", M1), "الحرف {{q|}} ينطق ازاي؟");
+});
+
+test("computeMarkerInsert: الخط التاني بيستخدم قوسينه", () => {
+  assertEqual(typeAt("|", "s", M2), "((s|))");
+  assertEqual(typeAt("((s|))", "t", M2), "((st|))");
+});
+
+test("computeMarkerInsert: جوه قوسين من النوع التاني بيكتب من غير تعشيش", () => {
+  // واقف جوه (( )) وبيكتب بالخط الأول؟ التعشيش هيبوّظ العرض،
+  // فبيحط الحرف زي ما هو ويسيبك تتصرف.
+  assertEqual(typeAt("((a|))", "b", M1), "((ab|))");
+});
+
+test("computeMarkerInsert: بيستبدل النص المحدد", () => {
+  const r = computeMarkerInsert("{{abc}}", 2, 5, "x", "{{", "}}");
+  assertEqual(r.value, "{{x}}", "القيمة");
+  assertEqual(r.caret, 3, "مكان المؤشر");
+});
+
+test("computeMarkerInsert: المسافة مبتفتحش قوسين", () => {
+  assertEqual(typeAt("|", " ", M1), " |");
+  assertEqual(typeAt("{{ab|}}", " ", M1), "{{ab |}}");
+});

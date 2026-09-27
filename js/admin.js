@@ -122,8 +122,8 @@ function renderAddTab() {
       <p class="admin-hint">
         دوس على أي خانة فوق الأول (نص السؤال أو اختيار أو الإجابة)، وبعدين
         دوس على الحروف وهي هتتكتب جواها على طول.<br />
-        الخط الأول والتاني مفاتيحهم مختلفة — اللي بتكتبه بالخط الأول حطه بين
-        {{ }} واللي بالخط التاني حطه بين (( )).
+        <strong>الأقواس بتتحط لوحدها</strong> — الخط الأول بيحط {{ }} والتاني
+        بيحط (( ))، وإنت بس اكتب. شوف المعاينة تحت للتأكد.
       </p>
       <div class="kb-box-bar">
         <button class="btn kb-font-btn is-active" data-alt="0" type="button">الخط الأول</button>
@@ -178,6 +178,8 @@ function renderAddTab() {
 let keyboardTarget = null;
 // الفورم بيتعاد رسمه كتير، فالمستمع بيتركب مرة واحدة بس عشان ميتكرّرش
 let keyboardFocusHooked = false;
+// الخط المختار دلوقتي — بيحدد الأقواس اللي بتتحط: {{ }} ولا (( ))
+let keyboardIsAlt = false;
 
 const KEYBOARD_FIELD_NAMES = {
   "q-text": "نص السؤال",
@@ -212,6 +214,7 @@ function setupQuestionKeyboard() {
   const targetName = document.getElementById("kb-target-name");
 
   keyboardTarget = document.getElementById("q-text");
+  keyboardIsAlt = false;
   targetName.textContent = "بيكتب في: نص السؤال";
 
   // أي خانة نص في الفورم تبقى هي الهدف أول ما تدوس فيها.
@@ -238,7 +241,9 @@ function setupQuestionKeyboard() {
 
   keysWrap.addEventListener("click", (event) => {
     const key = event.target.closest(".kb-key");
-    if (key) insertIntoField(activeKeyboardTarget(), key.dataset.char);
+    if (!key) return;
+    const [open, close] = keyboardIsAlt ? ["((", "))"] : ["{{", "}}"];
+    insertCopticChar(activeKeyboardTarget(), key.dataset.char, open, close);
   });
 
   document.getElementById("kb-space").addEventListener("click", () => {
@@ -251,7 +256,8 @@ function setupQuestionKeyboard() {
   // تبديل الخط: المفاتيح بتتغير لأن الخطين توزيعهم مختلف
   box.querySelectorAll(".kb-font-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const isAlt = btn.dataset.alt === "1";
+      keyboardIsAlt = btn.dataset.alt === "1";
+      const isAlt = keyboardIsAlt;
       box.querySelectorAll(".kb-font-btn").forEach((b) =>
         b.classList.toggle("is-active", b === btn),
       );

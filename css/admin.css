@@ -283,3 +283,214 @@ body {
   font-weight: 600;
   color: var(--selected-border);
 }
+
+/* =====================================================================
+   تظبيط الشكل — الخانات والزراير والمسافات
+   ===================================================================== */
+
+.admin-section h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.admin-section h2 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+
+.admin-section h3 {
+  font-size: 16px;
+  color: var(--muted);
+  margin: 22px 0 8px;
+  font-weight: 600;
+}
+
+/* شاشة الدخول: كارت في النص بدل خانات سايبة على الشمال */
+#admin-login {
+  max-width: 380px;
+  margin: 48px auto;
+  padding: 28px 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 6px 24px var(--shadow);
+  text-align: center;
+}
+
+#admin-login input {
+  max-width: 100%;
+  margin: 0 0 10px;
+  text-align: start;
+}
+
+#admin-login .btn {
+  width: 100%;
+  margin: 8px 0 0;
+}
+
+/* الخانات: مسافات متساوية وحجم مريح */
+.admin label {
+  font-weight: 600;
+  color: var(--text);
+  margin: 18px 0 6px;
+}
+
+.admin label:first-child {
+  margin-top: 0;
+}
+
+/* عنوان الخانة اللي جنبه مربع اختيار لازم يبقى في سطر واحد */
+.admin label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.admin input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.admin select {
+  cursor: pointer;
+  /* سهم مخصص، لأن السهم الافتراضي بيبقى على الناحية الغلط في RTL */
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: 14px calc(50% - 2px), 19px calc(50% - 2px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-inline-start: 34px;
+}
+
+.admin textarea {
+  min-height: 92px;
+  line-height: 1.8;
+}
+
+/* الزراير */
+.admin .btn {
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 600;
+  transition: transform 0.06s ease, border-color 0.15s ease;
+}
+
+.admin .btn:active {
+  transform: translateY(1px);
+}
+
+.admin .btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+/* زرار الحفظ أهم حاجة في الصفحة، فيبان لوحده */
+#q-save {
+  margin-top: 22px;
+  padding-inline: 30px;
+}
+
+/* شريط التبويبات ينفصل عن اللي تحته */
+.admin-bar {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 22px;
+}
+
+.admin-bar-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.admin-bar-actions .btn {
+  margin: 0;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* البحث والفلترة */
+#q-search,
+#attempt-search {
+  max-width: 340px;
+  margin-bottom: 4px;
+}
+
+/* اللستات: إطار حوالين السطور بدل خطوط سايبة */
+#q-list,
+#attempt-list,
+#stats-list {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card-bg);
+  margin-top: 10px;
+}
+
+#q-list:empty,
+#attempt-list p,
+#stats-list p {
+  border: 0;
+}
+
+.admin-row:last-child {
+  border-bottom: 0;
+}
+
+.admin-row > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+/* خانات الاختيارات */
+.option-row input[type="text"] {
+  max-width: 100%;
+}
+
+.option-row input[type="radio"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+#q-add-option {
+  margin-top: 8px;
+  padding: 7px 14px;
+  font-size: 0.9rem;
+}
+
+/* المعاينة */
+#q-preview {
+  font-size: 18px;
+  line-height: 2;
+  min-height: 60px;
+}
+
+#q-preview:empty::before {
+  content: "المعاينة هتظهر هنا وأنت بتكتب";
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* تفاصيل المحاولة */
+.admin .review-item {
+  margin-bottom: 10px;
+}
+
+@media (max-width: 560px) {
+  .admin { padding: 12px; }
+  .admin-bar { flex-direction: column; align-items: stretch; }
+  .admin-bar-actions { justify-content: space-between; }
+  .admin-row .row-actions { justify-content: flex-end; }
+}
