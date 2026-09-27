@@ -688,11 +688,7 @@ themeToggleBtn.addEventListener("click", () => {
 
 let debugBrowsing = false;
 
-// 21031 -> "2_1031"، عشان الرقم يبان بنفس شكله في questions.js
-function formatQuestionId(id) {
-  const s = String(id);
-  return s.length > 1 ? s[0] + "_" + s.slice(1) : s;
-}
+// formatQuestionId متعرّفة في js/lib/quiz-core.js، بتستخدم من هنا زي ما هي.
 
 // TEMP: بيكتب "سؤال ١ من ٢٠" وجنبه id السؤال عشان المراجعة.
 // وقت الإطلاق: شيل جزء الـ id وسيب سطر t("questionOf") بس.
