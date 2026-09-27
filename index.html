@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz</title>
     <link id="favicon" rel="icon" type="image/png" href="assets/img/logo.png" />
-    <link rel="stylesheet" href="css/style.css?v=4" />
+    <link rel="stylesheet" href="css/style.css?v=5" />
   </head>
   <body>
     <div class="app">
@@ -38,22 +38,11 @@
 
         <button id="start-btn" class="btn primary">ابدأ الكويز</button>
 
-        <!-- TEMP: أدوات تجربة بس، هتتشال قبل الإطلاق -->
+        <!-- أدوات التجربة: بتظهر للأدمن المسجّل دخول بس -->
         <div class="debug-tools">
           <button id="debug-all-btn" class="btn debug-btn" type="button">
             🧪 اعرض كل الأسئلة
           </button>
-          <div class="debug-goto">
-            <input
-              id="debug-question-id-input"
-              type="text"
-              inputmode="numeric"
-              placeholder="رقم السؤال (مثال 2_1031)"
-            />
-            <button id="debug-goto-btn" class="btn debug-btn" type="button">
-              🧪 روح للسؤال
-            </button>
-          </div>
         </div>
       </section>
 
@@ -67,7 +56,7 @@
         <!-- TEMP: شريط تجربة بيبين كل سؤال جاوبته صح ولا غلط -->
         <div id="debug-answers-bar" class="debug-answers-bar"></div>
 
-        <!-- TEMP: أدوات تجربة بس، هتتشال قبل الإطلاق -->
+        <!-- أدوات التجربة: بتظهر للأدمن المسجّل دخول بس -->
         <div class="debug-tools debug-nav">
           <button id="debug-prev-btn" class="btn debug-btn" type="button">
             ◀️ السابق
@@ -75,6 +64,34 @@
           <button id="debug-next-btn" class="btn debug-btn" type="button">
             التالي ▶️
           </button>
+        </div>
+
+        <!-- النقل لسؤال معيّن: بالترتيب أو بالرقم الثابت -->
+        <div class="debug-tools debug-goto">
+          <div class="debug-goto-row">
+            <label for="debug-position-input">السؤال رقم</label>
+            <input
+              id="debug-position-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="مثال 5"
+            />
+            <button id="debug-position-btn" class="btn debug-btn" type="button">
+              🧪 روح
+            </button>
+          </div>
+          <div class="debug-goto-row">
+            <label for="debug-question-id-input">id السؤال رقم</label>
+            <input
+              id="debug-question-id-input"
+              type="text"
+              inputmode="numeric"
+              placeholder="مثال 2_1031"
+            />
+            <button id="debug-goto-btn" class="btn debug-btn" type="button">
+              🧪 روح
+            </button>
+          </div>
         </div>
         <h2 id="question-text" dir="rtl"></h2>
         <div id="answer-area" dir="rtl"></div>
@@ -91,10 +108,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js?v=4"></script>
-    <script src="js/lib/quiz-core.js?v=4"></script>
-    <script src="js/lib/coptic-markup.js?v=4"></script>
-    <script src="js/db.js?v=4"></script>
-    <script src="js/script.js?v=4"></script>
+    <script src="js/config.js?v=5"></script>
+    <script src="js/lib/quiz-core.js?v=5"></script>
+    <script src="js/lib/coptic-markup.js?v=5"></script>
+    <script src="js/db.js?v=5"></script>
+    <script src="js/script.js?v=5"></script>
   </body>
 </html>

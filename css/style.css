@@ -366,9 +366,26 @@ input[type="text"]:focus {
   margin-bottom: 12px;
 }
 
+/* خانتين النقل لسؤال معيّن، جوه الامتحان: واحدة بالترتيب وواحدة بالـ id */
 .debug-goto {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.debug-goto-row {
+  display: flex;
   gap: 8px;
+  align-items: center;
+}
+
+.debug-goto-row label {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--muted);
+  min-width: 96px;
+  text-align: start;
 }
 
 .debug-goto input[type="text"] {

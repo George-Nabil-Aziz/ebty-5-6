@@ -18,6 +18,8 @@ const debugAllBtn = document.getElementById("debug-all-btn");
 const debugPrevBtn = document.getElementById("debug-prev-btn");
 const debugNextBtn = document.getElementById("debug-next-btn");
 const debugQuestionIdInput = document.getElementById("debug-question-id-input");
+const debugPositionInput = document.getElementById("debug-position-input");
+const debugPositionBtn = document.getElementById("debug-position-btn");
 const debugGotoBtn = document.getElementById("debug-goto-btn");
 const debugAnswersBar = document.getElementById("debug-answers-bar");
 const progressText = document.getElementById("progress-text");
@@ -772,13 +774,39 @@ async function debugBrowse(startId) {
   debugRender();
 }
 
+// "السؤال رقم ٥" -> الخامس في اللستة اللي إنت فيها دلوقتي
+// (الـ ٤٠ بتوع الامتحان، أو كل الأسئلة لو داخل من "اعرض كل الأسئلة").
+function debugGotoPosition() {
+  const digits = debugPositionInput.value.replace(/\D/g, "");
+  if (!digits) return;
+  const position = Number(digits);
+  if (position < 1 || position > quizQuestions.length) {
+    alert("اكتب رقم من 1 لـ " + quizQuestions.length);
+    return;
+  }
+  debugGoToIndex(position - 1);
+}
+
+// "id السؤال 2_1031" -> الرقم الثابت للسؤال. لو مش في اللستة الحالية،
+// بيفتح كل الأسئلة ويروح له هناك.
 function debugGoto() {
   const digits = debugQuestionIdInput.value.replace(/\D/g, "");
   if (!digits) return;
-  debugBrowse(Number(digits)).catch(console.error);
+  const id = Number(digits);
+  const inCurrent = quizQuestions.findIndex((q) => q.id === id);
+  if (inCurrent >= 0) {
+    debugGoToIndex(inCurrent);
+    return;
+  }
+  debugBrowse(id).catch(console.error);
 }
 
 debugAllBtn.addEventListener("click", () => debugBrowse().catch(console.error));
+debugPositionBtn.addEventListener("click", debugGotoPosition);
+
+debugPositionInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") debugGotoPosition();
+});
 debugGotoBtn.addEventListener("click", debugGoto);
 
 debugQuestionIdInput.addEventListener("keydown", (e) => {
