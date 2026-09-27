@@ -27,6 +27,7 @@ const progressText = document.getElementById("progress-text");
 const questionText = document.getElementById("question-text");
 const answerArea = document.getElementById("answer-area");
 const nextBtn = document.getElementById("next-btn");
+const finishBtn = document.getElementById("finish-btn");
 const scoreText = document.getElementById("score-text");
 const reviewList = document.getElementById("review-list");
 const restartBtn = document.getElementById("restart-btn");
@@ -69,6 +70,10 @@ const TRANSLATIONS = {
     notice:
       "تنبيه: بعد ما تجاوب على أي سؤال مفيش رجوع فيه. في وقت بيعد قدره 15 دقيقة. حل على اد ما تقدر ومتخافش.",
     adminLink: "دخول الإدارة",
+    finish: "إنهاء الامتحان",
+    finishConfirm: (left) =>
+      `لسه فاضل ${left} سؤال ما جاوبتهمش. لو أنهيت دلوقتي مش هتقدر ترجع لهم. متأكد؟`,
+    finishNow: "متأكد إنك عايز تنهي الامتحان؟",
     nameLabel: "اسمك",
     nameRequired: "اكتب اسمك الأول",
     loading: "جاري التحميل...",
@@ -94,6 +99,10 @@ const TRANSLATIONS = {
     notice:
       "Note: once you answer a question, there's no going back. A 15-minute countdown timer is running. Answer as much as you can, and don't worry.",
     adminLink: "Admin sign in",
+    finish: "Finish quiz",
+    finishConfirm: (left) =>
+      `${left} questions are still unanswered. You will not be able to go back. Are you sure?`,
+    finishNow: "Finish the quiz now?",
     nameLabel: "Your name",
     nameRequired: "Please enter your name first",
     loading: "Loading...",
@@ -120,6 +129,10 @@ const TRANSLATIONS = {
     notice:
       "Remarque : une fois que vous répondez à une question, il n'y a pas de retour en arrière. Un compte à rebours de 15 minutes est actif. Répondez du mieux que vous pouvez, sans vous inquiéter.",
     adminLink: "Connexion admin",
+    finish: "Terminer le quiz",
+    finishConfirm: (left) =>
+      `Il reste ${left} questions sans réponse. Vous ne pourrez pas revenir. Êtes-vous sûr ?`,
+    finishNow: "Terminer le quiz maintenant ?",
     nameLabel: "Votre nom",
     nameRequired: "Veuillez d'abord saisir votre nom",
     loading: "Chargement...",
@@ -268,7 +281,12 @@ async function startQuiz() {
   try {
     const byDifficulty = await loadQuestions();
     quizQuestions = buildQuizOrder(byDifficulty);
-    currentAttemptId = await createAttempt(name, quizQuestions.length);
+    // الأدمن داخل يجرب، مش طالب بيمتحن — محاولته متتحسبش في الإحصائية
+    currentAttemptId = await createAttempt(
+      name,
+      quizQuestions.length,
+      DEBUG_TOOLS,
+    );
   } catch (e) {
     console.error(e);
     alert(t("loadError"));
@@ -596,6 +614,23 @@ function handleNext() {
   }
 }
 
+// إنهاء بدري: بيسجل إجابة السؤال اللي واقف عليه لو اختار حاجة،
+// وبعدين يروح للنتيجة. الأسئلة اللي ما وصلهاش مبتتسجلش خالص،
+// وصفحة الإدارة بتوري المحاولة إنها ما خلصتش.
+function finishEarly() {
+  const left = quizQuestions.length - currentIndex;
+  const message = left > 0 ? t("finishConfirm")(left) : t("finishNow");
+  if (!confirm(message)) return;
+
+  // لو مختار إجابة للسؤال الحالي، تتسجل قبل ما نخرج
+  if (selectedAnswer !== null && selectedAnswer !== undefined && selectedAnswer !== "") {
+    handleNext();
+    if (resultScreen.classList.contains("hidden") === false) return;
+  }
+
+  showResult();
+}
+
 function formatGiven(q, given) {
   if (given === null || given === undefined || given === "")
     return t("noAnswer");
@@ -662,6 +697,7 @@ function applyLanguage(lang) {
   studentNameLabel.textContent = t("nameLabel");
   adminLinkEl.title = t("adminLink");
   nextBtn.textContent = t("next");
+  finishBtn.textContent = t("finish");
   restartBtn.textContent = t("retry");
 
   renderLastScoreText();
@@ -859,6 +895,7 @@ db.auth
 
 startBtn.addEventListener("click", startQuiz);
 nextBtn.addEventListener("click", handleNext);
+finishBtn.addEventListener("click", finishEarly);
 restartBtn.addEventListener("click", renderStartScreen);
 
 applyLanguage(currentLang);

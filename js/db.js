@@ -45,12 +45,15 @@ async function fetchQuestionsByDifficulty() {
 
 // بيولّد الـ id في المتصفح لأن الطالب ممنوع من القراءة فمش هيقدر يستقبله من السيرفر.
 // الـ uuid كمان غير قابل للتخمين، فمحدش يقدر يعدل محاولة غيره.
-async function createAttempt(studentName, total) {
+// isPractice: محاولة الأدمن وهو بيراجع الأسئلة. بتتشال من إحصائية
+// أصعب الأسئلة عشان الغلط المقصود متحسبش غلط حقيقي.
+async function createAttempt(studentName, total, isPractice) {
   const id = crypto.randomUUID();
   const { error } = await db.from("attempts").insert({
     id,
     student_name: studentName.trim(),
     total,
+    is_practice: Boolean(isPractice),
   });
   if (error) throw error;
   return id;
@@ -111,7 +114,9 @@ async function setQuestionActive(id, active) {
 async function fetchAttempts(nameFilter) {
   let query = db
     .from("attempt_results")
-    .select("id, student_name, started_at, total, answered, score, is_finished")
+    .select(
+      "id, student_name, started_at, total, answered, score, is_finished, is_practice",
+    )
     .order("started_at", { ascending: false })
     .limit(500);
   if (nameFilter) query = query.ilike("student_name", `%${nameFilter}%`);
@@ -132,6 +137,14 @@ async function fetchAttemptAnswers(attemptId) {
     .order("position");
   if (error) throw error;
   return data;
+}
+
+async function setAttemptPractice(attemptId, isPractice) {
+  const { error } = await db
+    .from("attempts")
+    .update({ is_practice: isPractice })
+    .eq("id", attemptId);
+  if (error) throw error;
 }
 
 // بيمسح محاولة وكل إجاباتها. الإجابات بتتمسح تلقائياً بسبب

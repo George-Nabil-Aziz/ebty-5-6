@@ -494,3 +494,32 @@ body {
   .admin-bar-actions { justify-content: space-between; }
   .admin-row .row-actions { justify-content: flex-end; }
 }
+
+/* ===== المحاولات التجريبية ===== */
+.practice-badge {
+  display: inline-block;
+  margin-inline-start: 8px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--selected-bg);
+  color: var(--selected-border);
+  border: 1px solid var(--selected-border);
+  vertical-align: middle;
+}
+
+/* شريط جنبي بيميّز السطر من غير ما يشد العين أكتر من اللازم */
+.admin-row.is-practice {
+  border-inline-start: 3px solid var(--selected-border);
+  background: color-mix(in srgb, var(--selected-bg) 40%, transparent);
+}
+
+.practice-note {
+  background: var(--selected-bg);
+  border: 1px solid var(--selected-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+  line-height: 1.8;
+}

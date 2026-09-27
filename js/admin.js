@@ -564,28 +564,30 @@ async function renderAttemptsTab() {
       }
       rows.forEach((a) => {
         const row = document.createElement("div");
-        row.className = "admin-row";
+        row.className = "admin-row" + (a.is_practice ? " is-practice" : "");
 
         // الجزء اللي بيتداس عليه عشان تفتح التفاصيل
         const open = document.createElement("button");
         open.type = "button";
         open.className = "row-open";
 
+        const nameLine = document.createElement("div");
         const name = document.createElement("strong");
         name.textContent = a.student_name;
+        nameLine.appendChild(name);
+        if (a.is_practice) nameLine.appendChild(buildPracticeBadge());
 
         const meta = document.createElement("span");
         meta.textContent = `${formatDateTime(a.started_at)} — ${formatScore(a)}`;
 
-        open.appendChild(name);
+        open.appendChild(nameLine);
         open.appendChild(meta);
         open.addEventListener("click", () => showAttemptDetail(a));
 
         const actions = document.createElement("div");
         actions.className = "row-actions";
-        actions.appendChild(
-          buildDeleteAttemptBtn(a, () => draw(nameFilter)),
-        );
+        actions.appendChild(buildPracticeToggleBtn(a, () => draw(nameFilter)));
+        actions.appendChild(buildDeleteAttemptBtn(a, () => draw(nameFilter)));
 
         row.appendChild(open);
         row.appendChild(actions);
@@ -606,6 +608,39 @@ async function renderAttemptsTab() {
   });
 
   draw("");
+}
+
+// علامة بتقول إن المحاولة دي كانت تجربة مش امتحان حقيقي
+function buildPracticeBadge() {
+  const badge = document.createElement("span");
+  badge.className = "practice-badge";
+  badge.textContent = "🧪 اختبار";
+  badge.title = "محاولة تجريبية — مش داخلة في إحصائية أصعب الأسئلة";
+  return badge;
+}
+
+// زرار بيحط أو يشيل تعليم "تجريبية". بيتحط تلقائياً لما الأدمن يمتحن
+// وهو مسجّل دخول، والزرار ده عشان تصلّحه لو اتحط غلط.
+function buildPracticeToggleBtn(attempt, onDone) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn";
+  btn.textContent = attempt.is_practice ? "اعتبرها حقيقية" : "علّمها اختبار";
+  btn.title = attempt.is_practice
+    ? "ترجع تتحسب في الإحصائية"
+    : "تتشال من إحصائية أصعب الأسئلة";
+  btn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    btn.disabled = true;
+    try {
+      await setAttemptPractice(attempt.id, !attempt.is_practice);
+      onDone();
+    } catch (e) {
+      adminError(e.message);
+      btn.disabled = false;
+    }
+  });
+  return btn;
 }
 
 // زرار مسح محاولة. بيسأل الأول لأن المسح مفيهوش رجوع —
@@ -665,6 +700,15 @@ async function showAttemptDetail(attempt) {
       formatScore(attempt);
     container.appendChild(head);
 
+    if (attempt.is_practice) {
+      const note = document.createElement("p");
+      note.className = "practice-note";
+      note.textContent =
+        "🧪 خلي بالك: دي كانت محاولة تجريبية، مش امتحان حقيقي. " +
+        "إجاباتها مش داخلة في إحصائية أصعب الأسئلة.";
+      container.appendChild(note);
+    }
+
     if (answers.length === 0) {
       const empty = document.createElement("p");
       empty.textContent = "المحاولة دي مفيهاش أي إجابة.";
@@ -715,7 +759,8 @@ async function renderStatsTab() {
       <h2>أصعب الأسئلة على الناس</h2>
       <p class="admin-hint">
         مرتبة بنسبة الغلط. الأسئلة اللي اتجاوبت أقل من
-        ${MIN_ANSWERS_FOR_STATS} مرات مش ظاهرة هنا، لأن النسبة ساعتها مالهاش معنى.
+        ${MIN_ANSWERS_FOR_STATS} مرات مش ظاهرة هنا، لأن النسبة ساعتها مالهاش معنى.<br />
+        المحاولات المعلّمة 🧪 اختبار مش محسوبة هنا خالص.
       </p>
       <div id="stats-list"></div>
     `;

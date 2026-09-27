@@ -29,11 +29,14 @@ create index if not exists questions_active_difficulty_idx
 -- الدرجة وميعاد الانتهاء مش أعمدة هنا عن قصد: بيتحسبوا من جدول الإجابات
 -- في العرض attempt_results. كده متصفح الطالب مش بيقول درجته، الداتابيز
 -- هي اللي بتعدّها من إجاباته الحقيقية، فالغش مستحيل.
+-- is_practice: محاولة الأدمن وهو بيراجع الأسئلة. بتفضل ظاهرة في لستة
+-- المحاولات معلّمة، بس بتتشال من إحصائية أصعب الأسئلة عشان متلخبطهاش.
 create table if not exists attempts (
   id            uuid primary key,
   student_name  text not null check (length(trim(student_name)) between 1 and 60),
   started_at    timestamptz not null default now(),
-  total         integer not null
+  total         integer not null,
+  is_practice   boolean not null default false
 );
 
 create index if not exists attempts_started_at_idx on attempts (started_at desc);
@@ -69,6 +72,7 @@ drop policy if exists admin_manages_questions  on questions;
 drop policy if exists anyone_inserts_attempt   on attempts;
 drop policy if exists admin_reads_attempts     on attempts;
 drop policy if exists admin_deletes_attempts   on attempts;
+drop policy if exists admin_updates_attempts   on attempts;
 drop policy if exists anyone_inserts_answer    on attempt_answers;
 drop policy if exists admin_reads_answers      on attempt_answers;
 
@@ -93,6 +97,10 @@ create policy admin_reads_attempts on attempts
 create policy admin_deletes_attempts on attempts
   for delete to authenticated using (true);
 
+-- المحاولات: الأدمن يقدر يغيّر تعليم "تجريبية" لو اتحط غلط
+create policy admin_updates_attempts on attempts
+  for update to authenticated using (true) with check (true);
+
 -- الإجابات: أي حد يضيف، الأدمن بس يقرا
 create policy anyone_inserts_answer on attempt_answers
   for insert to anon, authenticated with check (true);
@@ -110,13 +118,14 @@ select
   a.student_name,
   a.started_at,
   a.total,
+  a.is_practice,
   count(aa.id)                                    as answered,
   count(aa.id) filter (where aa.is_correct)       as score,
   max(aa.answered_at)                             as last_answer_at,
   (count(aa.id) >= a.total)                       as is_finished
 from attempts a
 left join attempt_answers aa on aa.attempt_id = a.id
-group by a.id, a.student_name, a.started_at, a.total;
+group by a.id, a.student_name, a.started_at, a.total, a.is_practice;
 
 -- =====================================================================
 -- إحصائية: نسبة الغلط لكل سؤال
@@ -135,4 +144,6 @@ select
                                              as wrong_pct
 from attempt_answers aa
 join questions q on q.id = aa.question_id
+join attempts  a on a.id = aa.attempt_id
+where not a.is_practice
 group by q.id, q.question, q.difficulty;
