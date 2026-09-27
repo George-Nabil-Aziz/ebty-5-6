@@ -47,34 +47,3 @@ function formatQuestionId(id) {
   const s = String(id);
   return s.length > 1 ? s[0] + "_" + s.slice(1) : s;
 }
-
-// ===== حط أقواس الخط القبطي تلقائياً =====
-// الخطوط القبطية في المشروع قديمة: بترسم الشكل القبطي فوق حرف إنجليزي.
-// عشان كده أي حرف قبطي لازم يتحط بين {{ }} (الخط الأول) أو (( )) (التاني).
-// الدالة دي بتخلي كيبورد صفحة الإدارة يحط الأقواس لوحده بدل ما تكتبها بإيدك:
-//   واقف بره أي أقواس؟ بيفتح أقواس جديدة حوالين الحرف.
-//   واقف جوه أقواس؟ بيحط الحرف جواها، فالحروف بتتجمع في قوسين واحدين.
-//
-// بترجع { value, caret } — النص الجديد ومكان المؤشر بعد الكتابة.
-function computeMarkerInsert(value, selStart, selEnd, char, open, close) {
-  const before = value.slice(0, selStart);
-  const after = value.slice(selEnd);
-
-  // المسافة مبتفتحش أقواس — قوسين فيهم مسافة بس ملهمش معنى
-  const isSpace = char.trim() === "";
-
-  // جوه أقواس؟ بندوّر على أقرب فتح وأقرب قفل ورا المؤشر، من النوعين.
-  // لو أقرب حاجة ورانا فتحة، يبقى إحنا جوه — حتى لو من النوع التاني،
-  // وساعتها بنكتب من غير أقواس عشان منعشّشش.
-  const lastOpen = Math.max(before.lastIndexOf("{{"), before.lastIndexOf("(("));
-  const lastClose = Math.max(before.lastIndexOf("}}"), before.lastIndexOf("))"));
-  const inside = lastOpen > lastClose;
-
-  if (inside || isSpace) {
-    return { value: before + char + after, caret: selStart + char.length };
-  }
-  return {
-    value: before + open + char + close + after,
-    caret: selStart + open.length + char.length,
-  };
-}

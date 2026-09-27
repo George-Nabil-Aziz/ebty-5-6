@@ -795,5 +795,7 @@ async function renderStatsTab() {
   }
 }
 
+initTheme(); // من js/lib/theme.js
+
 // الجلسة محفوظة في localStorage، فلو داخل من قبل مبيسألش تاني.
 db.auth.getSession().then(({ data }) => showLoggedIn(Boolean(data.session)));

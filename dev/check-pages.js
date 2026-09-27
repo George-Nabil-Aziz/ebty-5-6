@@ -8,6 +8,9 @@
 //
 //   ٢. getElementById بيدور على عنصر مش موجود لا في الصفحة ولا بيتعمل
 //      ديناميكياً — بيرجع null والسطر اللي بعده بيقع.
+//
+//   ٣. صفحة بتستعمل دالة من مكتبة في js/lib بس ناسية تحمّل المكتبة —
+//      بتقع بـ "X is not defined" أول ما توصل للسطر ده.
 
 const fs = require("fs");
 const path = require("path");
@@ -22,6 +25,21 @@ const PAGES = [
 ];
 
 let problems = 0;
+
+// أسماء الدوال اللي كل مكتبة في js/lib بتوفرها، بتتقرا مرة واحدة
+let libExportsCache = null;
+function libExports() {
+  if (libExportsCache) return libExportsCache;
+  const dir = path.join(ROOT, "js", "lib");
+  libExportsCache = {};
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith(".js"))) {
+    const code = fs.readFileSync(path.join(dir, file), "utf8");
+    libExportsCache[file] = [
+      ...code.matchAll(/^function\s+([A-Za-z_$][\w$]*)/gm),
+    ].map((m) => m[1]);
+  }
+  return libExportsCache;
+}
 
 function localScripts(html, pageDir) {
   return [...html.matchAll(/<script src="([^"]+)"/g)]
@@ -81,13 +99,31 @@ for (const page of PAGES) {
   ]);
   const missing = [...wanted].filter((id) => !present.has(id));
 
+  // ---------- ٣. مكتبة مستعملة بس مش محمّلة ----------
+  // لكل دالة معرّفة في js/lib، لو الصفحة بتناديها لازم تكون محمّلة المكتبة.
+  const loaded = new Set(scripts.map(({ src }) => path.basename(src.split("?")[0])));
+  const unloaded = [];
+
+  for (const [libFile, names] of Object.entries(libExports())) {
+    if (loaded.has(libFile)) continue;
+    for (const name of names) {
+      const called = new RegExp("(?<![.\\w$])" + name + "\\s*\\(");
+      if (called.test(joined)) {
+        unloaded.push(`${name}() من ${libFile} — الصفحة بتستعملها بس مش محمّلة الملف`);
+        break;
+      }
+    }
+  }
+
+  const total = clashes.length + missing.length + unloaded.length;
   console.log(`\n${page} — ${scripts.length} ملف، ${owner.size} اسم، ${wanted.size} عنصر`);
-  if (clashes.length === 0 && missing.length === 0) {
+  if (total === 0) {
     console.log("  ✅ تمام");
   } else {
     clashes.forEach((c) => console.log("  ❌ " + c));
     missing.forEach((m) => console.log("  ❌ عنصر مش موجود: " + m));
-    problems += clashes.length + missing.length;
+    unloaded.forEach((u) => console.log("  ❌ " + u));
+    problems += total;
   }
 }
 

@@ -33,14 +33,12 @@ const reviewList = document.getElementById("review-list");
 const restartBtn = document.getElementById("restart-btn");
 const timerEl = document.getElementById("timer");
 const langToggleBtn = document.getElementById("lang-toggle");
-const themeToggleBtn = document.getElementById("theme-toggle");
 const adminLinkEl = document.getElementById("admin-link");
 const BEST_SCORE_KEY = "quiz_best_score";
 const LAST_SCORE_KEY = "quiz_last_score";
 const LAST_TOTAL_KEY = "quiz_last_total";
 const STUDENT_NAME_KEY = "quiz_student_name";
 const LANG_KEY = "quiz_lang";
-const THEME_KEY = "quiz_theme";
 const QUIZ_DURATION_SECONDS = 15 * 60;
 
 const TRUEFALSE_ICONS = { true: "✅", false: "❌" };
@@ -715,20 +713,8 @@ function applyLanguage(lang) {
   }
 }
 
-function applyTheme(theme) {
-  localStorage.setItem(THEME_KEY, theme);
-  document.documentElement.dataset.theme = theme;
-  themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
-}
-
 langToggleBtn.addEventListener("click", () => {
   applyLanguage(LANGS[(LANGS.indexOf(currentLang) + 1) % LANGS.length]);
-});
-
-themeToggleBtn.addEventListener("click", () => {
-  const next =
-    document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(next);
 });
 
 // ===== TEMP: أدوات تجربة، هتتشال قبل الإطلاق =====
@@ -899,5 +885,5 @@ finishBtn.addEventListener("click", finishEarly);
 restartBtn.addEventListener("click", renderStartScreen);
 
 applyLanguage(currentLang);
-applyTheme(localStorage.getItem(THEME_KEY) || "light");
+initTheme(); // من js/lib/theme.js
 renderStartScreen();

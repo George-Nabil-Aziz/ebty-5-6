@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>كيبورد قبطي - الخط الأول</title>
     <link id="favicon" rel="icon" type="image/png" href="../assets/img/logo.png" />
-    <link rel="stylesheet" href="../css/style.css?v=9" />
-    <link rel="stylesheet" href="../css/keyboard.css?v=9" />
+    <link rel="stylesheet" href="../css/style.css?v=10" />
+    <link rel="stylesheet" href="../css/keyboard.css?v=10" />
+    <script>
+      // الثيم المحفوظ بيتطبّق قبل الرسم عشان متشوفش ومضة بيضا.
+      // مكرر هنا عن قصد: لازم يشتغل قبل تحميل مكتبة الثيم.
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("quiz_theme") === "dark" ? "dark" : "light";
+      } catch (e) {}
+    </script>
   </head>
   <body class="kb-font-main">
     <div class="app app-wide">
@@ -51,8 +59,9 @@
       <div id="kb-keys"></div>
     </div>
 
-    <script src="../js/lib/coptic-keyboard.js?v=9"></script>
+    <script src="../js/lib/theme.js?v=10"></script>
+    <script src="../js/lib/coptic-keyboard.js?v=10"></script>
 
-    <script src="../js/keyboard.js?v=9"></script>
+    <script src="../js/keyboard.js?v=10"></script>
   </body>
 </html>

@@ -5,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>إدارة الكويز</title>
     <link rel="icon" type="image/png" href="../assets/img/logo.png" />
-    <link rel="stylesheet" href="../css/style.css?v=9" />
-    <link rel="stylesheet" href="../css/keyboard.css?v=9" />
-    <link rel="stylesheet" href="../css/admin.css?v=9" />
+    <link rel="stylesheet" href="../css/style.css?v=10" />
+    <link rel="stylesheet" href="../css/keyboard.css?v=10" />
+    <link rel="stylesheet" href="../css/admin.css?v=10" />
+    <script>
+      // الثيم المحفوظ بيتطبّق قبل الرسم عشان متشوفش ومضة بيضا.
+      // مكرر هنا عن قصد: لازم يشتغل قبل تحميل مكتبة الثيم.
+      try {
+        document.documentElement.dataset.theme =
+          localStorage.getItem("quiz_theme") === "dark" ? "dark" : "light";
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div class="admin">
@@ -44,6 +52,7 @@
           </nav>
           <div class="admin-bar-actions">
             <a class="btn" href="../index.html">🧪 امتحن بنفسك</a>
+            <button id="theme-toggle" class="toggle-btn" type="button">🌙</button>
             <button id="admin-logout-btn" class="btn" type="button">خروج</button>
           </div>
         </div>
@@ -56,11 +65,12 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../js/config.js?v=9"></script>
-    <script src="../js/lib/quiz-core.js?v=9"></script>
-    <script src="../js/lib/coptic-markup.js?v=9"></script>
-    <script src="../js/lib/coptic-keyboard.js?v=9"></script>
-    <script src="../js/db.js?v=9"></script>
-    <script src="../js/admin.js?v=9"></script>
+    <script src="../js/config.js?v=10"></script>
+    <script src="../js/lib/theme.js?v=10"></script>
+    <script src="../js/lib/quiz-core.js?v=10"></script>
+    <script src="../js/lib/coptic-markup.js?v=10"></script>
+    <script src="../js/lib/coptic-keyboard.js?v=10"></script>
+    <script src="../js/db.js?v=10"></script>
+    <script src="../js/admin.js?v=10"></script>
   </body>
 </html>

@@ -10,6 +10,7 @@ const vm = require("vm");
 
 const FILES = [
   path.join(__dirname, "..", "js", "lib", "quiz-core.js"),
+  path.join(__dirname, "..", "js", "lib", "coptic-keyboard.js"),
   path.join(__dirname, "quiz-core.tests.js"),
 ];
 

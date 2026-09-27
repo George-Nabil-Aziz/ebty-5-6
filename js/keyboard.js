@@ -3,15 +3,12 @@
 // js/lib/coptic-keyboard.js، عشان صفحة الإدارة تستخدمهم هي كمان.
 // الملف ده بقى مسؤول عن الصفحة دي بس: النسخ، والثيم، وربط الأزرار.
 
-const THEME_KEY = "quiz_theme";
-
 const output = document.getElementById("kb-output");
 const keysWrap = document.getElementById("kb-keys");
 const copyBtn = document.getElementById("kb-copy");
 const spaceBtn = document.getElementById("kb-space");
 const backBtn = document.getElementById("kb-back");
 const clearBtn = document.getElementById("kb-clear");
-const themeToggleBtn = document.getElementById("theme-toggle");
 
 // الصفحة بتقول هي بأنهي خط، والمفاتيح بتتاخد من العمود المناسب
 const isAltFont = document.body.classList.contains("kb-font-alt");
@@ -38,13 +35,6 @@ function flashCopyBtn(message) {
   copyResetTimer = setTimeout(() => {
     copyBtn.textContent = "📋 نسخ";
   }, 2000);
-}
-
-// ===== الثيم (نفس مفتاح التخزين بتاع الكويز عشان يفضل متزامن) =====
-function applyTheme(theme) {
-  localStorage.setItem(THEME_KEY, theme);
-  document.documentElement.dataset.theme = theme;
-  themeToggleBtn.textContent = theme === "dark" ? "☀️" : "🌙";
 }
 
 // ===== الأحداث =====
@@ -76,13 +66,7 @@ copyBtn.addEventListener("click", () => {
     .catch(() => flashCopyBtn("محدّد — دوس Ctrl+C"));
 });
 
-themeToggleBtn.addEventListener("click", () => {
-  const next =
-    document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(next);
-});
-
 // ===== التشغيل =====
 renderCopticKeys(keysWrap, isAltFont);
-applyTheme(localStorage.getItem(THEME_KEY) || "light");
+initTheme(); // من js/lib/theme.js
 output.focus({ preventScroll: true });
