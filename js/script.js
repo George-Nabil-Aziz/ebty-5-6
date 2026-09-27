@@ -631,12 +631,6 @@ function showResult() {
   setBestScore(score);
   setLastScore(score, userAnswers.length);
 
-  if (currentAttemptId) {
-    finishAttempt(currentAttemptId, score, userAnswers.length).catch((e) =>
-      console.warn("قفل المحاولة فشل", e),
-    );
-  }
-
   renderResult();
   showScreen(resultScreen);
 }

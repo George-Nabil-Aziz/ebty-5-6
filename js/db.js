@@ -67,14 +67,6 @@ async function recordAnswer(attemptId, questionId, position, given, correct) {
   if (error) throw error;
 }
 
-async function finishAttempt(attemptId, score, total) {
-  const { error } = await db
-    .from("attempts")
-    .update({ finished_at: new Date().toISOString(), score, total })
-    .eq("id", attemptId);
-  if (error) throw error;
-}
-
 // ---------- الأسئلة: للأدمن بس (محتاجة تسجيل دخول) ----------
 
 // أكبر id مستخدم لنوع معيّن، عشان nextQuestionId يحسب الرقم الجاي.
@@ -114,10 +106,12 @@ async function setQuestionActive(id, active) {
 
 // ---------- المحاولات: للأدمن بس ----------
 
+// بتقرا من العرض attempt_results مش من جدول attempts، عشان الدرجة
+// تيجي محسوبة من الإجابات الحقيقية مش من اللي المتصفح قاله.
 async function fetchAttempts(nameFilter) {
   let query = db
-    .from("attempts")
-    .select("id, student_name, started_at, finished_at, score, total")
+    .from("attempt_results")
+    .select("id, student_name, started_at, total, answered, score, is_finished")
     .order("started_at", { ascending: false })
     .limit(500);
   if (nameFilter) query = query.ilike("student_name", `%${nameFilter}%`);

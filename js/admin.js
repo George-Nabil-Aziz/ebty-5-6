@@ -513,8 +513,12 @@ function formatDateTime(iso) {
   });
 }
 
+// الدرجة جاية محسوبة من الداتابيز (العرض attempt_results)، مش من المتصفح.
+// اللي ما خلصش بنوريله درجته على اللي جاوبه فعلاً، عشان تعرف كان ماشي إزاي.
 function formatScore(a) {
-  return a.finished_at ? `${a.score} / ${a.total}` : "ما خلصش";
+  if (a.is_finished) return `${a.score} / ${a.total}`;
+  if (a.answered === 0) return `ما بدأش — 0 من ${a.total}`;
+  return `${a.score} / ${a.answered} — ما خلصش (من ${a.total})`;
 }
 
 // إجابة الطالب بشكل مقروء
