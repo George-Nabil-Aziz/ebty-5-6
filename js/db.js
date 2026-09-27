@@ -140,6 +140,13 @@ async function fetchAttemptAnswers(attemptId) {
   return data;
 }
 
+// بيمسح محاولة وكل إجاباتها. الإجابات بتتمسح تلقائياً بسبب
+// on delete cascade اللي في تعريف جدول attempt_answers.
+async function deleteAttempt(attemptId) {
+  const { error } = await db.from("attempts").delete().eq("id", attemptId);
+  if (error) throw error;
+}
+
 // ---------- الإحصائية: للأدمن بس ----------
 
 // بتقرا من العرض question_stats. الأسئلة اللي اتجاوبت أقل من minAnswers مرة

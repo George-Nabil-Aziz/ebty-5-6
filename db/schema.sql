@@ -68,6 +68,7 @@ drop policy if exists admin_manages_questions  on questions;
 drop policy if exists anyone_inserts_attempt   on attempts;
 drop policy if exists anyone_finishes_attempt  on attempts;
 drop policy if exists admin_reads_attempts     on attempts;
+drop policy if exists admin_deletes_attempts   on attempts;
 drop policy if exists anyone_inserts_answer    on attempt_answers;
 drop policy if exists admin_reads_answers      on attempt_answers;
 
@@ -92,6 +93,11 @@ create policy anyone_finishes_attempt on attempts
 -- المحاولات: الأدمن بس يقراها
 create policy admin_reads_attempts on attempts
   for select to authenticated using (true);
+
+-- المحاولات: الأدمن يقدر يمسح محاولة، وإجاباتها بتتمسح معاها تلقائياً
+-- بسبب on delete cascade اللي في جدول attempt_answers
+create policy admin_deletes_attempts on attempts
+  for delete to authenticated using (true);
 
 -- الإجابات: أي حد يضيف، الأدمن بس يقرا
 create policy anyone_inserts_answer on attempt_answers

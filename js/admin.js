@@ -117,6 +117,26 @@ function renderAddTab() {
       استخدم {{ }} بدل ما تعلّمها.
     </p>
 
+    <details id="q-keyboard-box" class="kb-box">
+      <summary>⌨️ كيبورد قبطي</summary>
+      <p class="admin-hint">
+        دوس على أي خانة فوق الأول (نص السؤال أو اختيار أو الإجابة)، وبعدين
+        دوس على الحروف وهي هتتكتب جواها على طول.<br />
+        الخط الأول والتاني مفاتيحهم مختلفة — اللي بتكتبه بالخط الأول حطه بين
+        {{ }} واللي بالخط التاني حطه بين (( )).
+      </p>
+      <div class="kb-box-bar">
+        <button class="btn kb-font-btn is-active" data-alt="0" type="button">الخط الأول</button>
+        <button class="btn kb-font-btn" data-alt="1" type="button">الخط التاني</button>
+        <span id="kb-target-name" class="admin-hint"></span>
+      </div>
+      <div class="kb-box-bar">
+        <button id="kb-space" class="btn" type="button">مسافة</button>
+        <button id="kb-back" class="btn" type="button">⌫ مسح</button>
+      </div>
+      <div id="q-keyboard" class="kb-font-main"></div>
+    </details>
+
     <h3>معاينة</h3>
     <div id="q-preview"></div>
 
@@ -136,6 +156,7 @@ function renderAddTab() {
 
   renderAnswerFields(q);
   renderPreview();
+  setupQuestionKeyboard();
 
   // تغيير النوع بيمسح الإجابة القديمة لأنها مش بتنفع للنوع الجديد
   typeSelect.addEventListener("change", () => {
@@ -147,6 +168,96 @@ function renderAddTab() {
   document.getElementById("q-cancel").addEventListener("click", () => {
     editingQuestion = null;
     renderAddTab();
+  });
+}
+
+// ===== الكيبورد القبطي جوه فورم السؤال =====
+// بيكتب في آخر خانة اتحط فيها المؤشر — نص السؤال أو أي اختيار أو الإجابة.
+// من غير كده كل ضغطة زرار كانت هتشيل التركيز من الخانة وميعرفش يكتب فين.
+
+let keyboardTarget = null;
+// الفورم بيتعاد رسمه كتير، فالمستمع بيتركب مرة واحدة بس عشان ميتكرّرش
+let keyboardFocusHooked = false;
+
+const KEYBOARD_FIELD_NAMES = {
+  "q-text": "نص السؤال",
+  "q-fill-answer": "الإجابة",
+};
+
+function fieldDisplayName(field) {
+  if (KEYBOARD_FIELD_NAMES[field.id]) return KEYBOARD_FIELD_NAMES[field.id];
+  if (field.classList.contains("option-text")) {
+    const rows = [...document.querySelectorAll(".option-text")];
+    return "اختيار " + (rows.indexOf(field) + 1);
+  }
+  return "";
+}
+
+// الخانة اللي الكيبورد هيكتب فيها دلوقتي. لو الخانة اللي كانت متحددة اتشالت
+// من الصفحة (مثلاً غيّرت نوع السؤال وأنت واقف على اختيار)، بيرجع لنص السؤال
+// بدل ما يكتب في عنصر مش موجود والكلام يضيع من غير ما تاخد بالك.
+function activeKeyboardTarget() {
+  if (keyboardTarget && document.body.contains(keyboardTarget)) {
+    return keyboardTarget;
+  }
+  keyboardTarget = document.getElementById("q-text");
+  const nameEl = document.getElementById("kb-target-name");
+  if (nameEl) nameEl.textContent = "بيكتب في: نص السؤال";
+  return keyboardTarget;
+}
+
+function setupQuestionKeyboard() {
+  const box = document.getElementById("q-keyboard-box");
+  const keysWrap = document.getElementById("q-keyboard");
+  const targetName = document.getElementById("kb-target-name");
+
+  keyboardTarget = document.getElementById("q-text");
+  targetName.textContent = "بيكتب في: نص السؤال";
+
+  // أي خانة نص في الفورم تبقى هي الهدف أول ما تدوس فيها.
+  // #tab-add نفسه مش بيتغير مع إعادة الرسم (اللي بيتغير هو اللي جواه)،
+  // فالمستمع بيتركب مرة واحدة بس، وبيدوّر على عنصر الاسم وقت الحدث
+  // مش وقت التركيب عشان ميمسكش عنصر قديم اتشال.
+  if (!keyboardFocusHooked) {
+    keyboardFocusHooked = true;
+    document.getElementById("tab-add").addEventListener("focusin", (event) => {
+      const field = event.target;
+      const isTextField =
+        field.tagName === "TEXTAREA" ||
+        (field.tagName === "INPUT" && field.type === "text");
+      if (!isTextField) return;
+      keyboardTarget = field;
+      const nameEl = document.getElementById("kb-target-name");
+      if (!nameEl) return;
+      const name = fieldDisplayName(field);
+      nameEl.textContent = name ? "بيكتب في: " + name : "";
+    });
+  }
+
+  renderCopticKeys(keysWrap, false);
+
+  keysWrap.addEventListener("click", (event) => {
+    const key = event.target.closest(".kb-key");
+    if (key) insertIntoField(activeKeyboardTarget(), key.dataset.char);
+  });
+
+  document.getElementById("kb-space").addEventListener("click", () => {
+    insertIntoField(activeKeyboardTarget(), " ");
+  });
+  document.getElementById("kb-back").addEventListener("click", () => {
+    deleteBackFromField(activeKeyboardTarget());
+  });
+
+  // تبديل الخط: المفاتيح بتتغير لأن الخطين توزيعهم مختلف
+  box.querySelectorAll(".kb-font-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const isAlt = btn.dataset.alt === "1";
+      box.querySelectorAll(".kb-font-btn").forEach((b) =>
+        b.classList.toggle("is-active", b === btn),
+      );
+      keysWrap.className = isAlt ? "kb-font-alt" : "kb-font-main";
+      renderCopticKeys(keysWrap, isAlt);
+    });
   });
 }
 
@@ -282,17 +393,36 @@ async function renderListTab() {
   container.innerHTML = "<p>جاري التحميل...</p>";
   try {
     const rows = await fetchAllQuestions();
+
+    // عدد كل مستوى بيظهر جنب اسمه في زرار الفلتر
+    const countOf = (d) => rows.filter((r) => r.difficulty === d).length;
+
     container.innerHTML = `
-      <h2>كل الأسئلة (${rows.length})</h2>
+      <h2>كل الأسئلة</h2>
+      <div class="filter-bar">
+        <button class="filter-btn is-active" data-difficulty="" type="button">الكل (${rows.length})</button>
+        <button class="filter-btn" data-difficulty="easy" type="button">سهل (${countOf("easy")})</button>
+        <button class="filter-btn" data-difficulty="medium" type="button">متوسط (${countOf("medium")})</button>
+        <button class="filter-btn" data-difficulty="hard" type="button">صعب (${countOf("hard")})</button>
+      </div>
       <input id="q-search" type="text" placeholder="بحث في نص السؤال" />
+      <p id="q-count" class="admin-hint"></p>
       <div id="q-list"></div>
     `;
 
     const listEl = document.getElementById("q-list");
+    const countEl = document.getElementById("q-count");
+    let currentDifficulty = "";
+    let currentSearch = "";
 
-    function draw(filter) {
+    function draw() {
+      const shown = rows.filter(
+        (r) =>
+          (!currentDifficulty || r.difficulty === currentDifficulty) &&
+          (!currentSearch || r.question.includes(currentSearch)),
+      );
+      countEl.textContent = `ظاهر ${shown.length} من ${rows.length}`;
       listEl.innerHTML = "";
-      const shown = rows.filter((r) => !filter || r.question.includes(filter));
       if (shown.length === 0) {
         listEl.innerHTML = "<p>مفيش سؤال مطابق.</p>";
         return;
@@ -300,10 +430,22 @@ async function renderListTab() {
       shown.forEach((r) => listEl.appendChild(buildQuestionRow(r)));
     }
 
-    draw("");
-    document
-      .getElementById("q-search")
-      .addEventListener("input", (e) => draw(e.target.value.trim()));
+    container.querySelectorAll(".filter-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        currentDifficulty = btn.dataset.difficulty;
+        container
+          .querySelectorAll(".filter-btn")
+          .forEach((b) => b.classList.toggle("is-active", b === btn));
+        draw();
+      });
+    });
+
+    document.getElementById("q-search").addEventListener("input", (e) => {
+      currentSearch = e.target.value.trim();
+      draw();
+    });
+
+    draw();
   } catch (e) {
     adminError(e.message);
   }
@@ -411,9 +553,13 @@ async function renderAttemptsTab() {
         return;
       }
       rows.forEach((a) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "admin-row";
+        const row = document.createElement("div");
+        row.className = "admin-row";
+
+        // الجزء اللي بيتداس عليه عشان تفتح التفاصيل
+        const open = document.createElement("button");
+        open.type = "button";
+        open.className = "row-open";
 
         const name = document.createElement("strong");
         name.textContent = a.student_name;
@@ -421,10 +567,19 @@ async function renderAttemptsTab() {
         const meta = document.createElement("span");
         meta.textContent = `${formatDateTime(a.started_at)} — ${formatScore(a)}`;
 
-        btn.appendChild(name);
-        btn.appendChild(meta);
-        btn.addEventListener("click", () => showAttemptDetail(a));
-        listEl.appendChild(btn);
+        open.appendChild(name);
+        open.appendChild(meta);
+        open.addEventListener("click", () => showAttemptDetail(a));
+
+        const actions = document.createElement("div");
+        actions.className = "row-actions";
+        actions.appendChild(
+          buildDeleteAttemptBtn(a, () => draw(nameFilter)),
+        );
+
+        row.appendChild(open);
+        row.appendChild(actions);
+        listEl.appendChild(row);
       });
     } catch (e) {
       adminError(e.message);
@@ -443,6 +598,36 @@ async function renderAttemptsTab() {
   draw("");
 }
 
+// زرار مسح محاولة. بيسأل الأول لأن المسح مفيهوش رجوع —
+// المحاولة وكل إجاباتها بيروحوا مع بعض.
+function buildDeleteAttemptBtn(attempt, onDone) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn btn-danger";
+  btn.textContent = "🗑 مسح";
+  btn.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    const when = formatDateTime(attempt.started_at);
+    if (
+      !confirm(
+        `هتمسح محاولة "${attempt.student_name}" بتاريخ ${when} وكل إجاباتها.\n` +
+          "مفيش رجوع في ده. متأكد؟",
+      )
+    ) {
+      return;
+    }
+    btn.disabled = true;
+    try {
+      await deleteAttempt(attempt.id);
+      onDone();
+    } catch (e) {
+      adminError(e.message);
+      btn.disabled = false;
+    }
+  });
+  return btn;
+}
+
 async function showAttemptDetail(attempt) {
   const container = document.getElementById("tab-attempts");
   container.innerHTML = "<p>جاري التحميل...</p>";
@@ -451,12 +636,18 @@ async function showAttemptDetail(attempt) {
 
     container.innerHTML = "";
 
+    const bar = document.createElement("div");
+    bar.className = "detail-bar";
+
     const back = document.createElement("button");
     back.type = "button";
     back.className = "btn";
     back.textContent = "‹ رجوع للمحاولات";
     back.addEventListener("click", renderAttemptsTab);
-    container.appendChild(back);
+
+    bar.appendChild(back);
+    bar.appendChild(buildDeleteAttemptBtn(attempt, renderAttemptsTab));
+    container.appendChild(bar);
 
     const head = document.createElement("h2");
     head.textContent =
