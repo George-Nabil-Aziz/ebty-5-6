@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Quiz</title>
     <link id="favicon" rel="icon" type="image/png" href="assets/img/logo.png" />
-    <link rel="stylesheet" href="css/style.css?v=5" />
+    <link rel="stylesheet" href="css/style.css?v=6" />
   </head>
   <body>
     <div class="app">
@@ -53,10 +53,15 @@
           <span id="timer" class="timer">15:00</span>
         </div>
 
-        <!-- TEMP: شريط تجربة بيبين كل سؤال جاوبته صح ولا غلط -->
+        <h2 id="question-text" dir="rtl"></h2>
+        <div id="answer-area" dir="rtl"></div>
+        <button id="next-btn" class="btn primary">التالي</button>
+
+        <!-- ===== أدوات التجربة: تحت خالص، وبتظهر للأدمن المسجّل دخول بس ===== -->
+
+        <!-- شريط بيبين كل سؤال جاوبته صح ولا غلط -->
         <div id="debug-answers-bar" class="debug-answers-bar"></div>
 
-        <!-- أدوات التجربة: بتظهر للأدمن المسجّل دخول بس -->
         <div class="debug-tools debug-nav">
           <button id="debug-prev-btn" class="btn debug-btn" type="button">
             ◀️ السابق
@@ -66,7 +71,8 @@
           </button>
         </div>
 
-        <!-- النقل لسؤال معيّن: بالترتيب أو بالرقم الثابت -->
+        <!-- النقل لسؤال معيّن. صف الـ id بيظهر في وضع "كل الأسئلة" بس،
+             لأن الرقم الثابت ملوش لازمة جوه امتحان عادي. -->
         <div class="debug-tools debug-goto">
           <div class="debug-goto-row">
             <label for="debug-position-input">السؤال رقم</label>
@@ -80,7 +86,7 @@
               🧪 روح
             </button>
           </div>
-          <div class="debug-goto-row">
+          <div id="debug-goto-id-row" class="debug-goto-row">
             <label for="debug-question-id-input">id السؤال رقم</label>
             <input
               id="debug-question-id-input"
@@ -93,9 +99,6 @@
             </button>
           </div>
         </div>
-        <h2 id="question-text" dir="rtl"></h2>
-        <div id="answer-area" dir="rtl"></div>
-        <button id="next-btn" class="btn primary">التالي</button>
       </section>
 
       <!-- شاشة النتيجة -->
@@ -108,10 +111,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js?v=5"></script>
-    <script src="js/lib/quiz-core.js?v=5"></script>
-    <script src="js/lib/coptic-markup.js?v=5"></script>
-    <script src="js/db.js?v=5"></script>
-    <script src="js/script.js?v=5"></script>
+    <script src="js/config.js?v=6"></script>
+    <script src="js/lib/quiz-core.js?v=6"></script>
+    <script src="js/lib/coptic-markup.js?v=6"></script>
+    <script src="js/db.js?v=6"></script>
+    <script src="js/script.js?v=6"></script>
   </body>
 </html>

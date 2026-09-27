@@ -20,6 +20,7 @@ const debugNextBtn = document.getElementById("debug-next-btn");
 const debugQuestionIdInput = document.getElementById("debug-question-id-input");
 const debugPositionInput = document.getElementById("debug-position-input");
 const debugPositionBtn = document.getElementById("debug-position-btn");
+const debugGotoIdRow = document.getElementById("debug-goto-id-row");
 const debugGotoBtn = document.getElementById("debug-goto-btn");
 const debugAnswersBar = document.getElementById("debug-answers-bar");
 const progressText = document.getElementById("progress-text");
@@ -702,19 +703,28 @@ let debugBrowsing = false;
 
 // formatQuestionId متعرّفة في js/lib/quiz-core.js، بتستخدم من هنا زي ما هي.
 
-// TEMP: بيكتب "سؤال ١ من ٢٠" وجنبه id السؤال عشان المراجعة.
-// وقت الإطلاق: شيل جزء الـ id وسيب سطر t("questionOf") بس.
+// "سؤال ١ من ٢٠"، ومعاه id السؤال في وضع "اعرض كل الأسئلة" بس —
+// الرقم الثابت ده بتحتاجه وإنت بتراجع الأسئلة عشان تلاقي السؤال في
+// صفحة الإدارة، لكن جوه امتحان عادي هو مجرد دوشة.
 function setProgressText() {
   const q = quizQuestions[currentIndex];
   const base = t("questionOf")(currentIndex + 1, quizQuestions.length);
-  progressText.textContent = DEBUG_TOOLS
-    ? base + "  •  id " + formatQuestionId(q.id)
-    : base;
+  progressText.textContent =
+    DEBUG_TOOLS && debugBrowsing
+      ? base + "  •  id " + formatQuestionId(q.id)
+      : base;
 }
 
 // شريط فوق السؤال فيه مربع لكل سؤال: أخضر لو جاوبته صح، أحمر لو غلط،
 // ورمادي لو لسه. دوس على أي مربع يوديك للسؤال بتاعه على طول.
+// صف الـ id بيتخفي في الامتحان العادي، بيبان في وضع التصفح بس
+function applyDebugGotoVisibility() {
+  if (!debugGotoIdRow) return;
+  debugGotoIdRow.hidden = !debugBrowsing;
+}
+
 function renderDebugAnswersBar() {
+  applyDebugGotoVisibility();
   if (!DEBUG_TOOLS || !debugAnswersBar) return;
 
   debugAnswersBar.innerHTML = "";
