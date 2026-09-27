@@ -130,6 +130,18 @@ h1 {
   border-color: var(--selected-border);
 }
 
+/* زرار الإدارة لينك مش زرار، فمحتاج يتظبط عشان يبقى بنفس شكل اللي جنبه */
+a.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  line-height: 1;
+}
+
+a.toggle-btn[hidden] {
+  display: none;
+}
+
 h2 {
   font-size: 20px;
   margin: 0 0 20px;

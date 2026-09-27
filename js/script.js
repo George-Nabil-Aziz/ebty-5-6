@@ -28,6 +28,7 @@ const restartBtn = document.getElementById("restart-btn");
 const timerEl = document.getElementById("timer");
 const langToggleBtn = document.getElementById("lang-toggle");
 const themeToggleBtn = document.getElementById("theme-toggle");
+const adminLinkEl = document.getElementById("admin-link");
 const BEST_SCORE_KEY = "quiz_best_score";
 const LAST_SCORE_KEY = "quiz_last_score";
 const LAST_TOTAL_KEY = "quiz_last_total";
@@ -62,6 +63,7 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `آخر نتيجة: ${score}/${total}`,
     notice:
       "تنبيه: بعد ما تجاوب على أي سؤال مفيش رجوع فيه. في وقت بيعد قدره 15 دقيقة. حل على اد ما تقدر ومتخافش.",
+    adminLink: "دخول الإدارة",
     nameLabel: "اسمك",
     nameRequired: "اكتب اسمك الأول",
     loading: "جاري التحميل...",
@@ -86,6 +88,7 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `Last score: ${score}/${total}`,
     notice:
       "Note: once you answer a question, there's no going back. A 15-minute countdown timer is running. Answer as much as you can, and don't worry.",
+    adminLink: "Admin sign in",
     nameLabel: "Your name",
     nameRequired: "Please enter your name first",
     loading: "Loading...",
@@ -111,6 +114,7 @@ const TRANSLATIONS = {
     lastScore: (score, total) => `Dernier score : ${score}/${total}`,
     notice:
       "Remarque : une fois que vous répondez à une question, il n'y a pas de retour en arrière. Un compte à rebours de 15 minutes est actif. Répondez du mieux que vous pouvez, sans vous inquiéter.",
+    adminLink: "Connexion admin",
     nameLabel: "Votre nom",
     nameRequired: "Veuillez d'abord saisir votre nom",
     loading: "Chargement...",
@@ -163,6 +167,9 @@ function showScreen(screen) {
     s.classList.add("hidden"),
   );
   screen.classList.remove("hidden");
+  // زرار الإدارة بيختفي أثناء الامتحان: الطالب لو داسه بالغلط هيخرج
+  // من الامتحان والمؤقت ماشي.
+  adminLinkEl.hidden = screen === quizScreen;
 }
 
 function getBestScore() {
@@ -648,6 +655,7 @@ function applyLanguage(lang) {
   resultTitleEl.textContent = t("resultTitle");
   startBtn.textContent = t("start");
   studentNameLabel.textContent = t("nameLabel");
+  adminLinkEl.title = t("adminLink");
   nextBtn.textContent = t("next");
   restartBtn.textContent = t("retry");
 
